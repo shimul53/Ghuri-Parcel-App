@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1050145828041",
+    "project_id": "ghuri-parcel",
+    "storage_bucket": "ghuri-parcel.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1050145828041:android:9c93458c7ef8fb9173b118",
+        "android_client_info": {
+          "package_name": "com.shimultamo.ghuriparcelapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1050145828041-51h6pat5v3cartso1khlqu3npplhtlc2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEExPQgNUbX5-wKbCrASf9LxFYt7_ht00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1050145828041-51h6pat5v3cartso1khlqu3npplhtlc2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

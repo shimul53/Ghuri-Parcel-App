@@ -65,6 +65,11 @@ flutter:
     - images/deselect_Call.png
     - images/link.png
     - images/message.png
+    - images/dashbord_deselect.png
+    - images/parcel_deselect.png
+    - images/payment_deselect.png
+    - images/plus_selected.png
+    - images/plus_deselect.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ghuri_parcel_app/AllScreens/mainScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/otpScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/registrationScreen.dart';
 import 'package:ghuri_parcel_app/AllWidgets/customElevationColor.dart';
@@ -30,7 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   signIn(String email, String password, String phone) async {
-    String url = "https://api.ghuriparcel.com/v1/merchant/login/";
+    String url = "https://api.ghuriparcel.com/v1/merchant/login";
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     Map data = {"email": email, "password": password, "phone": phone};
     var jsonResponse = null;
@@ -161,8 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     FlatButton(
                       onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(context,
-                            RegistrationScreen.idScreen, (route) => false);
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, MainScreen.idScreen, (route) => false);
                       },
                       child: Text(
                         "Create a new Account",
@@ -199,6 +200,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   splashColor: Color.fromRGBO(255, 204, 0, 1),
                   elevation: 10,
                   onPressed: () {
+                    print("Login pressed");
+                    setState(() {
+                      _isLoading = true;
+                    });
                     signIn(
                         emailTextEditingController.text,
                         passwordTextEditingController.text,

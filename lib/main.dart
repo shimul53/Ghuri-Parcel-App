@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:ghuri_parcel_app/AllScreens/loginScreen.dart';
+import 'package:ghuri_parcel_app/AllScreens/mainScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/otpScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/registrationScreen.dart';
 import 'package:ghuri_parcel_app/splash.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         RegistrationScreen.idScreen: (context) => RegistrationScreen(),
         LoginScreen.idScreen: (context) => LoginScreen(),
         OTPScreen.idScreen: (context) => OTPScreen(),
+        MainScreen.idScreen: (context) => MainScreen(),
       },
       debugShowCheckedModeBanner: false,
       home: SplashScreen(),

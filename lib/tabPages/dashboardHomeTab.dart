@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class DashboardHomeTab extends StatefulWidget {
   @override
@@ -10,6 +11,17 @@ class DashboardHomeTab extends StatefulWidget {
 class _DashboardHomeTabState extends State<DashboardHomeTab> {
   @override
   Widget build(BuildContext context) {
+    final List<ChartData> chartData = [
+      ChartData('Pending', 1, Color.fromRGBO(51, 51, 51, 1)),
+      ChartData('On pick up', 0, Color.fromRGBO(145, 177, 198, 1)),
+      ChartData('Picked up', 0, Color.fromRGBO(107, 107, 107, 1)),
+      ChartData('In hub', 0, Color.fromRGBO(108, 210, 112, 1)),
+      ChartData('On delivery', 0, Color.fromRGBO(114, 163, 116, 1)),
+      ChartData('Delivered', 0, Color.fromRGBO(68, 138, 255, 1)),
+      ChartData('Return', 0, Color.fromRGBO(255, 106, 95, 1)),
+      ChartData('Return Done', 0, Color.fromRGBO(212, 138, 133, 1)),
+      ChartData('Payment Done', 0, Color.fromRGBO(255, 204, 0, 1)),
+    ];
     return Scaffold(
       backgroundColor: Color.fromRGBO(237, 237, 237, 1),
       body: Column(
@@ -74,63 +86,89 @@ class _DashboardHomeTabState extends State<DashboardHomeTab> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Expanded(
-              child: Container(
-                height: 100,
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20.0),
-                    topRight: Radius.circular(20.0),
-                    bottomLeft: Radius.circular(20.0),
-                    bottomRight: Radius.circular(20.0),
-                  ),
+            padding: const EdgeInsets.only(
+                top: 10.0, bottom: 40.0, left: 20.0, right: 20.0),
+            child: Container(
+              height: 400,
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20.0),
+                  topRight: Radius.circular(20.0),
+                  bottomLeft: Radius.circular(20.0),
+                  bottomRight: Radius.circular(20.0),
                 ),
-                child: Row(
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Column(
                   children: [
-                    Text("Parcel Statistics"),
-                    SizedBox(
-                      width: 100,
-                    ),
-                    // Card(
-                    //   color: Color.fromRGBO(255, 204, 0, 1),
-                    //   child: Padding(
-                    //     padding: EdgeInsets.all(10.0),
-                    //     child: Text(
-                    //       "All",
-                    //       textAlign: TextAlign.center,
-                    //       style: TextStyle(
-                    //         color: Colors.black,
-                    //         fontSize: 20.0,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                    Card(
-                      color: Color.fromRGBO(255, 204, 0, 1),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          height: 30,
-                          width: 50,
-                          child: Text("All",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 20.0,
-                              )),
+                    Row(
+                      children: [
+                        Text("Parcel Statistics"),
+                        SizedBox(
+                          width: 145,
                         ),
-                      ),
-                    )
+                        Card(
+                          color: Color.fromRGBO(255, 204, 0, 1),
+                          child: SizedBox(
+                            height: 25,
+                            width: 55,
+                            child: Center(
+                              child: Text(
+                                "All",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Center(
+                      child: Container(
+                          child: SfCircularChart(
+
+                              // Enables the legend
+                              legend: Legend(
+                                isVisible: true,
+                                position: LegendPosition.right,
+                                overflowMode: LegendItemOverflowMode.wrap,
+                              ),
+                              series: <CircularSeries>[
+                            DoughnutSeries<ChartData, String>(
+                              dataSource: chartData,
+                              pointColorMapper: (ChartData data, _) =>
+                                  data.color,
+                              xValueMapper: (ChartData data, _) => data.x,
+                              yValueMapper: (ChartData data, _) => data.y,
+                              dataLabelSettings: DataLabelSettings(
+                                isVisible: true,
+                              ),
+                            ),
+                          ])),
+                    ),
                   ],
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
+}
+
+class ChartData {
+  final String x;
+  final int y;
+  final Color? color;
+  ChartData(this.x, this.y, [this.color]);
 }

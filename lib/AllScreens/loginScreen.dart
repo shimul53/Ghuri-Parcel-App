@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:flutter_glow/flutter_glow.dart';
+import 'package:path/path.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:ghuri_parcel_app/AllScreens/mainScreen.dart';
@@ -8,6 +11,8 @@ import 'package:ghuri_parcel_app/AllScreens/otpScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/registrationScreen.dart';
 import 'package:ghuri_parcel_app/AllWidgets/customElevationColor.dart';
 import 'package:ghuri_parcel_app/Models/login_model.dart';
+import 'package:ghuri_parcel_app/api/api_service.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,43 +32,12 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController phoneTextEditingController = TextEditingController();
 
   LoginRequestModel? requestModel;
-
   bool _isLoading = false;
-
-  signIn(String email, String password, String phone) async {
-    String url = "https://api.ghuriparcel.com/v1/merchant/login";
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    Map data = {"email": email, "password": password, "phone": phone};
-    var jsonResponse = null;
-    var res = await http.post(Uri.parse(url), body: data);
-    //check api status
-    if (res.statusCode == 200) {
-      jsonResponse = json.decode(res.body);
-      print("Response status: ${res.statusCode}");
-      print("Response status: ${res.body}");
-      print(jsonResponse);
-      if (jsonResponse != null) {
-        setState(() {
-          _isLoading = false;
-        });
-        sharedPreferences.setString("token", jsonResponse['data']['token']);
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
-            (Route<dynamic> route) => false);
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-        print("Response status: ${res.body}");
-      }
-    }
-  }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    requestModel = new LoginRequestModel();
+    // requestModel = new LoginRequestModel(phoneOrEmail: '', password: '');
   }
 
   @override
@@ -97,7 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextField(
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
                       controller: emailTextEditingController,
-                      onSubmitted: (input) => requestModel!.email = input,
+                      onSubmitted: (input) =>
+                          requestModel!.phoneOrEmail = input,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -162,8 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     FlatButton(
                       onPressed: () {
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, MainScreen.idScreen, (route) => false);
+                        Navigator.pushNamedAndRemoveUntil(context,
+                            RegistrationScreen.idScreen, (route) => false);
                       },
                       child: Text(
                         "Create a new Account",
@@ -182,9 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: RaisedButton(
+                child: GlowButton(
+                  height: 50,
+                  width: 400,
+                  borderRadius: new BorderRadius.circular(24.0),
                   color: Color.fromRGBO(255, 204, 0, 1),
-                  textColor: Colors.black,
+                  glowColor: Color.fromRGBO(255, 204, 0, 1),
                   child: Container(
                     height: 50.0,
                     child: Center(
@@ -194,20 +172,17 @@ class _LoginScreenState extends State<LoginScreen> {
                           )),
                     ),
                   ),
-                  shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(24.0),
-                  ),
-                  splashColor: Color.fromRGBO(255, 204, 0, 1),
-                  elevation: 10,
                   onPressed: () {
-                    print("Login pressed");
                     setState(() {
                       _isLoading = true;
                     });
-                    signIn(
-                        emailTextEditingController.text,
-                        passwordTextEditingController.text,
-                        phoneTextEditingController.text);
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) => MainScreen()),
+                        (Route<dynamic> route) => false);
+
+                    // loginAttempt(emailTextEditingController.text.toString(),
+                    //     passwordTextEditingController.text.toString(), context);
                   },
                 ),
               ),
@@ -216,5 +191,45 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+}
+
+loginAttempt(String userName, String password, BuildContext context) async {
+  print(userName);
+  print(password);
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+  String url = API.loginUrl;
+
+  var response = await http.post(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'phoneOrEmail': userName,
+      'password': password,
+      "userType": 1,
+      "userRole": 1,
+    }),
+  );
+  var jsonResponse;
+  if (response.statusCode == 200) {
+    jsonResponse = json.decode(response.body);
+    print(response.body);
+    if (response.body != null) {
+      print("successful");
+      if (response.body.isNotEmpty) {
+        print("logged in successfully");
+        sharedPreferences.setString("token", jsonResponse['token']);
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (BuildContext context) => MainScreen()),
+            (Route<dynamic> route) => false);
+      } else {
+        print("failed try again");
+      }
+    }
+  } else {
+    throw Exception('Failed to load album');
   }
 }

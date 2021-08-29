@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ghuri_parcel_app/AllScreens/loginScreen.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 import 'package:otp_text_field/style.dart';
 
@@ -106,7 +107,10 @@ class _OTPScreenState extends State<OTPScreen> {
                 SizedBox(
                   width: 330,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, LoginScreen.idScreen, (route) => false);
+                    },
                     style: ButtonStyle(
                       shadowColor: MaterialStateProperty.all<Color>(
                           Color.fromRGBO(255, 204, 0, 1)),
@@ -168,6 +172,7 @@ class _OTPScreenState extends State<OTPScreen> {
           keyboardType: TextInputType.number,
           maxLength: 1,
           decoration: InputDecoration(
+            contentPadding: EdgeInsets.symmetric(vertical: 12),
             counter: Offstage(),
             enabledBorder: OutlineInputBorder(
                 borderSide:

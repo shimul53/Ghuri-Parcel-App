@@ -12,17 +12,12 @@ class LoginResponseModel {
 }
 
 class LoginRequestModel {
-  String? email;
-  String? password;
-  String? phone;
-  LoginRequestModel({this.email, this.password, this.phone});
+  String phoneOrEmail;
+  String password;
+  LoginRequestModel({required this.phoneOrEmail, required this.password});
 
-  Map<String, dynamic>? toJson() {
-    Map<String, dynamic> map = {
-      "email": email!.trim(),
-      "password": password!.trim(),
-      "phone": phone!.trim(),
-    };
-    return map;
+  factory LoginRequestModel.fromJson(Map<String, dynamic> json) {
+    return LoginRequestModel(
+        phoneOrEmail: json["phoneOrEmail"], password: json["password"]);
   }
 }

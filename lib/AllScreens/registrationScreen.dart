@@ -3,8 +3,12 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_glow/flutter_glow.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ghuri_parcel_app/AllScreens/otpScreen.dart';
+import 'package:ghuri_parcel_app/Models/dropdownItemInfo.dart';
+import 'package:ghuri_parcel_app/Models/registration_model.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:ghuri_parcel_app/main.dart';
@@ -22,6 +26,8 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   bool _isLoading = false;
   var errorMsg;
+
+  RegistrationRequestModel? registrationRequestModel;
 
   TextEditingController firstNameTextEditingController =
       TextEditingController();
@@ -46,72 +52,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController cityTextEditingController =
       new TextEditingController();
 
-  var items = [
-    'Bagerhat',
-    'Bandarban',
-    'Barguna',
-    'Barisal',
-    'Bhola',
-    'Bogra',
-    'Brahmanbaria',
-    'Chandpur',
-    'Chapainawabganj',
-    'Chattogram',
-    'Chuadanga',
-    'Comilla',
-    "Cox's Bazar",
-    'Dhaka',
-    'Dinajpur',
-    'Faridpur',
-    'Feni',
-    'Gaibandha',
-    'Gazipur',
-    'Gopalganj',
-    'Habiganj',
-    'Jamalpur ',
-    'Jessore',
-    'Jhalokati',
-    'Jhenaidah',
-    'Joypurhat',
-    'Khagrachhari',
-    'Khulna',
-    'Kishoreganj',
-    'Kurigram',
-    'Kushtia',
-    'Lakshmipur',
-    'Lalmanirhat',
-    'Madaripur ',
-    'Magura',
-    'Manikganj',
-    'Meherpur',
-    'Moulvibazar',
-    'Munshiganj',
-    'Mymensingh',
-    'Naogaon',
-    'Narail',
-    'Naryanganj',
-    'Narsingdi',
-    'Natore',
-    'Netrakona',
-    'Nilphamari ',
-    'Noakhali',
-    'Pabna',
-    'Panchagarh',
-    'Patuakhali',
-    'Pirojpur',
-    'Rajbari',
-    'Rajshahi',
-    'Rangamati',
-    'Rangpur',
-    'Satkhira',
-    'Shariatpur',
-    'Sherpur ',
-    'Sirajgan',
-    'Sunamganj',
-    'Sylhet',
-    'Tangail',
-    'Thakurgaon',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    registrationRequestModel = new RegistrationRequestModel(
+        city: '',
+        password: '',
+        merchantName: '',
+        email: '',
+        phone: '',
+        address: '',
+        area: '',
+        shopName: '',
+        shopUrl: '');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +97,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 height: 10.0,
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 30.0),
+                padding: const EdgeInsets.only(left: 20.0),
                 child: Row(
                   children: [
                     Text(
@@ -174,6 +128,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             child: TextField(
                               cursorColor: Color.fromRGBO(255, 204, 0, 1),
                               controller: firstNameTextEditingController,
+                              onSubmitted: (input) => registrationRequestModel!
+                                  .merchantName = input,
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
                                 focusedBorder: UnderlineInputBorder(
@@ -208,6 +164,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             child: TextField(
                               cursorColor: Color.fromRGBO(255, 204, 0, 1),
                               controller: lastNameTextEditingController,
+                              onSubmitted: (input) => registrationRequestModel!
+                                  .merchantName = input,
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
                                 focusedBorder: UnderlineInputBorder(
@@ -239,6 +197,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: emailTextEditingController,
                       keyboardType: TextInputType.emailAddress,
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.email = input,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -269,6 +229,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: phoneTextEditingController,
                       keyboardType: TextInputType.phone,
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.phone = input,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -299,6 +261,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: passwordTextEditingController,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.password = input,
                       obscureText: true,
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -333,6 +297,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: confirmPasswordTextEditingController,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.password = input,
                       obscureText: true,
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -367,6 +333,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: shopNameTextEditingController,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.shopName = input,
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
                           borderSide:
@@ -396,6 +364,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     TextField(
                       controller: shopLinkTextEditingController,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.shopUrl = input,
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
                           borderSide:
@@ -428,6 +398,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           child: Container(
                             child: TextField(
                               controller: cityTextEditingController,
+                              onSubmitted: (input) =>
+                                  registrationRequestModel!.city = input,
                               cursorColor: Color.fromRGBO(255, 204, 0, 1),
                               keyboardType: TextInputType.name,
                               decoration: InputDecoration(
@@ -477,6 +449,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     TextField(
                       controller: addressTextEditingController,
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.address = input,
                       cursorColor: Color.fromRGBO(255, 204, 0, 1),
                       decoration: InputDecoration(
                         focusedBorder: UnderlineInputBorder(
@@ -539,51 +513,63 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: RaisedButton(
+                child: GlowButton(
+                    height: 50,
+                    width: 400,
+                    borderRadius: new BorderRadius.circular(24.0),
                     color: Color.fromRGBO(255, 204, 0, 1),
-                    textColor: Colors.black,
+                    glowColor: Color.fromRGBO(255, 204, 0, 1),
                     child: Container(
                       height: 50.0,
                       child: Center(
                         child: Text("SIGN UP",
                             style: TextStyle(
                               fontSize: 16.0,
+                              color: Colors.black,
                             )),
                       ),
                     ),
-                    shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(24.0),
-                    ),
-                    splashColor: Color.fromRGBO(255, 204, 0, 1),
-                    elevation: 10,
                     onPressed: () {
-                      if (firstNameTextEditingController.text.length < 3) {
-                        displayToastMessage(
-                            "Name must be atleast 3 Characters", context);
-                      } else if (lastNameTextEditingController.text.length <
-                          3) {
-                        displayToastMessage(
-                            "Name must be atleast 3 Characters", context);
-                      } else if (!emailTextEditingController.text
-                          .contains("@")) {
-                        displayToastMessage(
-                            " Email address is not valid", context);
-                      } else if (phoneTextEditingController.text.isEmpty) {
-                        displayToastMessage(
-                            "Phone number is mandatory", context);
-                      } else if (passwordTextEditingController.text.length <
-                          6) {
-                        displayToastMessage(
-                            "Password must be atleast 6 Characters", context);
-                      } else if (passwordTextEditingController.text.length !=
-                          confirmPasswordTextEditingController.text.length) {
-                        displayToastMessage(
-                            "Password must be atleast 6 Characters", context);
-                      } else {
-                        registerNewUser();
-                        Navigator.pushNamedAndRemoveUntil(
-                            context, OTPScreen.idScreen, (route) => false);
-                      }
+                      // if (firstNameTextEditingController.text.length < 3) {
+                      //   displayToastMessage(
+                      //       "Name must be atleast 3 Characters", context);
+                      // } else if (lastNameTextEditingController.text.length <
+                      //     3) {
+                      //   displayToastMessage(
+                      //       "Name must be atleast 3 Characters", context);
+                      // } else if (!emailTextEditingController.text
+                      //     .contains("@")) {
+                      //   displayToastMessage(
+                      //       " Email address is not valid", context);
+                      // } else if (phoneTextEditingController.text.isEmpty) {
+                      //   displayToastMessage(
+                      //       "Phone number is mandatory", context);
+                      // } else if (passwordTextEditingController.text.length <
+                      //     6) {
+                      //   displayToastMessage(
+                      //       "Password must be atleast 6 Characters", context);
+                      // } else if (passwordTextEditingController.text.length !=
+                      //     confirmPasswordTextEditingController.text.length) {
+                      //   displayToastMessage(
+                      //       "Password must be atleast 6 Characters", context);
+                      // } else {
+                      print("clicked");
+                      registerNewUser(
+                        firstNameTextEditingController.text.toString(),
+                        lastNameTextEditingController.text.toString(),
+                        emailTextEditingController.text.toString(),
+                        phoneTextEditingController.text.toString(),
+                        shopNameTextEditingController.text.toString(),
+                        shopLinkTextEditingController.text.toString(),
+                        cityTextEditingController.text.toString(),
+                        addressTextEditingController.text.toString(),
+                        passwordTextEditingController.text.toString(),
+                        context,
+                      );
+                      // Navigator.pushNamedAndRemoveUntil(
+                      //     context, OTPScreen.idScreen, (route) => false);
+                      // print(requestModel!.toJson());
+                      // }
                     }),
               ),
               SizedBox(
@@ -595,90 +581,108 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
   }
+}
 
-  Future registerNewUser() async {
-    var apiURL = "http://dev.api.ghuriparcel.com/v1/merchant/register/";
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+registerNewUser(
+    String firstName,
+    String lastName,
+    String email,
+    String phone,
+    String shopName,
+    String shopUrl,
+    String city,
+    String address,
+    String password,
+    BuildContext context) async {
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    Map userDataMap = {
-      "merchantName": firstNameTextEditingController.text.trim() +
-          " " +
-          lastNameTextEditingController.text.trim(),
-      "email": emailTextEditingController.text.trim(),
-      "phone": phoneTextEditingController.text.trim(),
-      "shopName": shopNameTextEditingController.text.trim(),
-      "shopUrl": shopLinkTextEditingController.text.trim(),
-      "city": cityTextEditingController.text.trim(),
-      "address": addressTextEditingController.text.trim(),
-      "password": passwordTextEditingController.text.trim(),
-    };
-    var jsonResponse = null;
+  // Map userDataMap = {
+  //   "merchantName": firstNameTextEditingController.text.trim() +
+  //       " " +
+  //       lastNameTextEditingController.text.trim(),
+  //   "email": emailTextEditingController.text.trim(),
+  //   "phone": phoneTextEditingController.text.trim(),
+  //   "shopName": shopNameTextEditingController.text.trim(),
+  //   "shopUrl": shopLinkTextEditingController.text.trim(),
+  //   "city": cityTextEditingController.text.trim(),
+  //   "address": addressTextEditingController.text.trim(),
+  //   "password": passwordTextEditingController.text.trim(),
+  // };
+  String url = API.registrationUrl;
 
-    print("JSON DATA: ${userDataMap}");
-    http.Response response =
-        await http.post(Uri.parse(apiURL), body: userDataMap);
+  var response = await http.post(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'merchantName': firstName + lastName,
+      'email': email,
+      'phone': phone,
+      'shopName': shopName,
+      'shopUrl': shopUrl,
+      'city': city,
+      'address': address,
+      'password': password,
+    }),
+  );
+  print(response.body);
+  var jsonResponse;
+  if (response.statusCode == 200) {
+    jsonResponse = json.decode(response.body);
+    print(response.body);
+    if (response.body != null) {
+      print(response.body);
 
-    if (response.statusCode == 200) {
-      jsonResponse = json.decode(response.body);
-      print(jsonResponse);
-      if (jsonResponse != null) {
-        setState(() {
-          _isLoading = false;
-        });
-        sharedPreferences.setString("token", jsonResponse['token']);
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
-            (Route<dynamic> route) => false);
-      } else {
-        setState(() {
-          _isLoading = false;
-        });
-        errorMsg = response.body;
-        print("The error message is: ${response.body}");
-      }
+      sharedPreferences.setString("token", jsonResponse['token']);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
+          (Route<dynamic> route) => false);
+    } else {
+      throw Exception('Failed to load');
     }
+  }
 
-    var data = jsonDecode(response.body);
-    print("DATA: ${data}");
+  // var data = jsonDecode(response.body);
+  // print("DATA: ${data}");
 
-    // showDialog(
-    //     context: context,
-    //     barrierDismissible: false,
-    //     builder: (BuildContext context) {
-    //       return ProgressDialog(
-    //         message: "Registering, Please wait...",
-    //       );
-    //     });
+  // showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (BuildContext context) {
+  //       return ProgressDialog(
+  //         message: "Registering, Please wait...",
+  //       );
+  //     });
 
-    // final User? firebaseUser = (await _firebaseAuth
-    //         .createUserWithEmailAndPassword(
-    //             email: emailTextEditingController.text,
-    //             password: passwordTextEditingController.text)
-    //         .catchError((errMsg) {
-    //   Navigator.pop(context);
-    //   displayToastMessage("Error:" + errMsg.toString(), context);
-    // }))
-    //     .user;
-    // if (firebaseUser != null) {
-    //   Map userDataMap = {
-    //     "first_name": firstNameTextEditingController.text.trim(),
-    //     "last_name": lastNameTextEditingController.text.trim(),
-    //     "email": emailTextEditingController.text.trim(),
-    //     "phone": phoneTextEditingController.text.trim(),
-    //     "shop_name": shopNameTextEditingController.text.trim(),
-    //     "shop_link": shopLinkTextEditingController.text.trim(),
-    //     "city": cityTextEditingController.text.trim(),
-    //     "address": addressTextEditingController.text.trim(),
-    //   };
-    //   userRef.child(firebaseUser.uid).set(userDataMap);
-    //   displayToastMessage(" Your has been created Successfully", context);
-    // Navigator.pushNamedAndRemoveUntil(
-    //     context, MainScreen.idScreen, (route) => false);
+  // final User? firebaseUser = (await _firebaseAuth
+  //         .createUserWithEmailAndPassword(
+  //             email: emailTextEditingController.text,
+  //             password: passwordTextEditingController.text)
+  //         .catchError((errMsg) {
+  //   Navigator.pop(context);
+  //   displayToastMessage("Error:" + errMsg.toString(), context);
+  // }))
+  //     .user;
+  // if (firebaseUser != null) {
+  //   Map userDataMap = {
+  //     "first_name": firstNameTextEditingController.text.trim(),
+  //     "last_name": lastNameTextEditingController.text.trim(),
+  //     "email": emailTextEditingController.text.trim(),
+  //     "phone": phoneTextEditingController.text.trim(),
+  //     "shop_name": shopNameTextEditingController.text.trim(),
+  //     "shop_link": shopLinkTextEditingController.text.trim(),
+  //     "city": cityTextEditingController.text.trim(),
+  //     "address": addressTextEditingController.text.trim(),
+  //   };
+  //   userRef.child(firebaseUser.uid).set(userDataMap);
+  //   displayToastMessage(" Your has been created Successfully", context);
+  // Navigator.pushNamedAndRemoveUntil(
+  //     context, MainScreen.idScreen, (route) => false);
 //     } else {
 //       Navigator.pop(context);
 //       displayToastMessage(" New user account has not been created", context);
 //     }
-  }
 }
 
 displayToastMessage(String message, BuildContext context) {

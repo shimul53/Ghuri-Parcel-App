@@ -7,6 +7,7 @@ import 'package:ghuri_parcel_app/AllScreens/profileScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/refundPolicyScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/termsConditionScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/updateProfileScreen.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileTab extends StatefulWidget {
@@ -389,8 +390,9 @@ class _ProfileTabState extends State<ProfileTab> {
                   children: [
                     TextButton(
                       onPressed: () {
-                        sharedPreferences!.clear();
+                        sharedPreferences!.remove("token");
                         sharedPreferences!.commit();
+
                         Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
                                 builder: (BuildContext context) =>

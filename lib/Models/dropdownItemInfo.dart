@@ -65,6 +65,19 @@ var items = [
   'Thakurgaon',
 ];
 
+var areaItems = [
+  "Badda",
+  "Dhanmondi",
+  "Gulshan",
+  "Jatrabari",
+  "Malibag",
+  "Mirpur",
+  "Mohakhali",
+  "Mohammadpur",
+  "Puran Dhaka",
+  "Uttara"
+];
+
 var paymentItems = ["Unpaid", "Paid"];
 var deliveryTypeItems = ["Next Day Delivery", "Same Day Delivery"];
 

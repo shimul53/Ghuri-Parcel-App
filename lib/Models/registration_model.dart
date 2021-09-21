@@ -21,18 +21,19 @@ class RegistrationRequestModel {
   String city;
   String area;
   String address;
+  String msisdn;
 
-  RegistrationRequestModel({
-    required this.merchantName,
-    required this.email,
-    required this.phone,
-    required this.password,
-    required this.shopName,
-    required this.shopUrl,
-    required this.city,
-    required this.area,
-    required this.address,
-  });
+  RegistrationRequestModel(
+      {required this.merchantName,
+      required this.email,
+      required this.phone,
+      required this.password,
+      required this.shopName,
+      required this.shopUrl,
+      required this.city,
+      required this.area,
+      required this.address,
+      required this.msisdn});
   factory RegistrationRequestModel.fromJson(Map<String, dynamic> json) {
     return RegistrationRequestModel(
       merchantName: json["merchantName"],
@@ -44,6 +45,7 @@ class RegistrationRequestModel {
       city: json["city"],
       area: json["area"],
       address: json["address"],
+      msisdn: json["msisdn"],
     );
   }
 }

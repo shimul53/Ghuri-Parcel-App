@@ -49,6 +49,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   TextEditingController addressTextEditingController = TextEditingController();
 
+  TextEditingController areaTextEditingController = TextEditingController();
+
   final TextEditingController cityTextEditingController =
       new TextEditingController();
 
@@ -56,15 +58,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void initState() {
     super.initState();
     registrationRequestModel = new RegistrationRequestModel(
-        city: '',
-        password: '',
-        merchantName: '',
-        email: '',
-        phone: '',
-        address: '',
-        area: '',
-        shopName: '',
-        shopUrl: '');
+      city: '',
+      password: '',
+      merchantName: '',
+      email: '',
+      phone: '',
+      address: '',
+      area: '',
+      shopName: '',
+      shopUrl: '',
+      msisdn: '',
+    );
   }
 
   @override
@@ -477,6 +481,38 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       style: TextStyle(fontSize: 14.0),
                     ),
                     SizedBox(
+                      height: 1.0,
+                    ),
+                    TextField(
+                      controller: areaTextEditingController,
+                      onSubmitted: (input) =>
+                          registrationRequestModel!.area = input,
+                      cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                      decoration: InputDecoration(
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Color.fromRGBO(255, 204, 0, 1)),
+                        ),
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide(
+                            color: Color.fromRGBO(255, 204, 0, 1),
+                          ),
+                        ),
+                        prefixIcon: Image.asset(
+                          "images/area_deselect.png",
+                          scale: 3,
+                        ),
+                        labelText: "Area",
+                        labelStyle:
+                            TextStyle(fontSize: 14.0, color: Colors.black87),
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 10.0,
+                        ),
+                      ),
+                      style: TextStyle(fontSize: 14.0),
+                    ),
+                    SizedBox(
                       height: 10.0,
                     ),
                     Padding(
@@ -530,46 +566,44 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                     ),
                     onPressed: () {
-                      // if (firstNameTextEditingController.text.length < 3) {
-                      //   displayToastMessage(
-                      //       "Name must be atleast 3 Characters", context);
-                      // } else if (lastNameTextEditingController.text.length <
-                      //     3) {
-                      //   displayToastMessage(
-                      //       "Name must be atleast 3 Characters", context);
-                      // } else if (!emailTextEditingController.text
-                      //     .contains("@")) {
-                      //   displayToastMessage(
-                      //       " Email address is not valid", context);
-                      // } else if (phoneTextEditingController.text.isEmpty) {
-                      //   displayToastMessage(
-                      //       "Phone number is mandatory", context);
-                      // } else if (passwordTextEditingController.text.length <
-                      //     6) {
-                      //   displayToastMessage(
-                      //       "Password must be atleast 6 Characters", context);
-                      // } else if (passwordTextEditingController.text.length !=
-                      //     confirmPasswordTextEditingController.text.length) {
-                      //   displayToastMessage(
-                      //       "Password must be atleast 6 Characters", context);
-                      // } else {
-                      print("clicked");
-                      registerNewUser(
-                        firstNameTextEditingController.text.toString(),
-                        lastNameTextEditingController.text.toString(),
-                        emailTextEditingController.text.toString(),
-                        phoneTextEditingController.text.toString(),
-                        shopNameTextEditingController.text.toString(),
-                        shopLinkTextEditingController.text.toString(),
-                        cityTextEditingController.text.toString(),
-                        addressTextEditingController.text.toString(),
-                        passwordTextEditingController.text.toString(),
-                        context,
-                      );
-                      // Navigator.pushNamedAndRemoveUntil(
-                      //     context, OTPScreen.idScreen, (route) => false);
-                      // print(requestModel!.toJson());
-                      // }
+                      if (firstNameTextEditingController.text.length < 3) {
+                        displayToastMessage(
+                            "Name must be atleast 3 Characters", context);
+                      } else if (lastNameTextEditingController.text.length <
+                          3) {
+                        displayToastMessage(
+                            "Name must be atleast 3 Characters", context);
+                      } else if (!emailTextEditingController.text
+                          .contains("@")) {
+                        displayToastMessage(
+                            " Email address is not valid", context);
+                      } else if (phoneTextEditingController.text.isEmpty) {
+                        displayToastMessage(
+                            "Phone number is mandatory", context);
+                      } else if (passwordTextEditingController.text.length <
+                          6) {
+                        displayToastMessage(
+                            "Password must be atleast 6 Characters", context);
+                      } else if (passwordTextEditingController.text.length !=
+                          confirmPasswordTextEditingController.text.length) {
+                        displayToastMessage(
+                            "Password must be atleast 6 Characters", context);
+                      } else {
+                        print("clicked");
+                        registerNewUser(
+                          firstNameTextEditingController.text.toString(),
+                          lastNameTextEditingController.text.toString(),
+                          emailTextEditingController.text.toString(),
+                          phoneTextEditingController.text.toString(),
+                          shopNameTextEditingController.text.toString(),
+                          shopLinkTextEditingController.text.toString(),
+                          cityTextEditingController.text.toString(),
+                          areaTextEditingController.text.toString(),
+                          addressTextEditingController.text.toString(),
+                          passwordTextEditingController.text.toString(),
+                          context,
+                        );
+                      }
                     }),
               ),
               SizedBox(
@@ -593,21 +627,8 @@ registerNewUser(
     String city,
     String address,
     String password,
+    String area,
     BuildContext context) async {
-  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-  // Map userDataMap = {
-  //   "merchantName": firstNameTextEditingController.text.trim() +
-  //       " " +
-  //       lastNameTextEditingController.text.trim(),
-  //   "email": emailTextEditingController.text.trim(),
-  //   "phone": phoneTextEditingController.text.trim(),
-  //   "shopName": shopNameTextEditingController.text.trim(),
-  //   "shopUrl": shopLinkTextEditingController.text.trim(),
-  //   "city": cityTextEditingController.text.trim(),
-  //   "address": addressTextEditingController.text.trim(),
-  //   "password": passwordTextEditingController.text.trim(),
-  // };
   String url = API.registrationUrl;
 
   var response = await http.post(
@@ -616,73 +637,37 @@ registerNewUser(
       'Content-Type': 'application/json',
     },
     body: jsonEncode(<String, dynamic>{
-      'merchantName': firstName + lastName,
+      'merchantName': firstName + " " + lastName,
       'email': email,
       'phone': phone,
       'shopName': shopName,
       'shopUrl': shopUrl,
       'city': city,
+      'area': area,
       'address': address,
       'password': password,
+      "userType": 1,
+      "userRole": 1,
     }),
   );
-  print(response.body);
-  var jsonResponse;
-  if (response.statusCode == 200) {
-    jsonResponse = json.decode(response.body);
-    print(response.body);
-    if (response.body != null) {
-      print(response.body);
+  String sendOtpUrl = API.sendOTP;
+  var otpResponse = await http.post(
+    Uri.parse(sendOtpUrl),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(<String, dynamic>{
+      "msisdn": "88" + phone,
+    }),
+  );
 
-      sharedPreferences.setString("token", jsonResponse['token']);
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
-          (Route<dynamic> route) => false);
-    } else {
-      throw Exception('Failed to load');
-    }
+  if (response.statusCode == 200 && otpResponse.statusCode == 200) {
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
+        (Route<dynamic> route) => false);
+  } else {
+    throw Exception('Failed to load data');
   }
-
-  // var data = jsonDecode(response.body);
-  // print("DATA: ${data}");
-
-  // showDialog(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return ProgressDialog(
-  //         message: "Registering, Please wait...",
-  //       );
-  //     });
-
-  // final User? firebaseUser = (await _firebaseAuth
-  //         .createUserWithEmailAndPassword(
-  //             email: emailTextEditingController.text,
-  //             password: passwordTextEditingController.text)
-  //         .catchError((errMsg) {
-  //   Navigator.pop(context);
-  //   displayToastMessage("Error:" + errMsg.toString(), context);
-  // }))
-  //     .user;
-  // if (firebaseUser != null) {
-  //   Map userDataMap = {
-  //     "first_name": firstNameTextEditingController.text.trim(),
-  //     "last_name": lastNameTextEditingController.text.trim(),
-  //     "email": emailTextEditingController.text.trim(),
-  //     "phone": phoneTextEditingController.text.trim(),
-  //     "shop_name": shopNameTextEditingController.text.trim(),
-  //     "shop_link": shopLinkTextEditingController.text.trim(),
-  //     "city": cityTextEditingController.text.trim(),
-  //     "address": addressTextEditingController.text.trim(),
-  //   };
-  //   userRef.child(firebaseUser.uid).set(userDataMap);
-  //   displayToastMessage(" Your has been created Successfully", context);
-  // Navigator.pushNamedAndRemoveUntil(
-  //     context, MainScreen.idScreen, (route) => false);
-//     } else {
-//       Navigator.pop(context);
-//       displayToastMessage(" New user account has not been created", context);
-//     }
 }
 
 displayToastMessage(String message, BuildContext context) {

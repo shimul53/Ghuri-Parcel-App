@@ -176,13 +176,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     setState(() {
                       _isLoading = true;
                     });
-                    Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                            builder: (BuildContext context) => MainScreen()),
-                        (Route<dynamic> route) => false);
 
-                    // loginAttempt(emailTextEditingController.text.toString(),
-                    //     passwordTextEditingController.text.toString(), context);
+                    userLogin(emailTextEditingController.text.toString(),
+                        passwordTextEditingController.text.toString(), context);
+
+                    // Navigator.of(context).pushAndRemoveUntil(
+                    //     MaterialPageRoute(
+                    //         builder: (BuildContext context) => MainScreen()),
+                    //     (Route<dynamic> route) => false);
                   },
                 ),
               ),
@@ -194,9 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-loginAttempt(String userName, String password, BuildContext context) async {
-  print(userName);
-  print(password);
+userLogin(String userName, String password, BuildContext context) async {
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
   String url = API.loginUrl;
@@ -217,19 +216,33 @@ loginAttempt(String userName, String password, BuildContext context) async {
   if (response.statusCode == 200) {
     jsonResponse = json.decode(response.body);
     print(response.body);
-    if (response.body != null) {
-      print("successful");
-      if (response.body.isNotEmpty) {
-        print("logged in successfully");
-        sharedPreferences.setString("token", jsonResponse['token']);
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (BuildContext context) => MainScreen()),
-            (Route<dynamic> route) => false);
-      } else {
-        print("failed try again");
-      }
-    }
+
+    print(jsonResponse['account']);
+
+    print(jsonResponse['account']['address']);
+    print(jsonResponse['account']['merchantName']);
+    print(jsonResponse['account']['ID']);
+
+    sharedPreferences.setString(
+      API.token,
+      jsonResponse['token'],
+    );
+    sharedPreferences.setString(
+        API.merchantAddress, jsonResponse['account']['address']);
+
+    sharedPreferences.setString(
+        API.merchantName, jsonResponse['account']['merchantName']);
+    sharedPreferences.setString(
+        API.merchantPhone, jsonResponse['account']['phone']);
+    sharedPreferences.setString(
+        API.merchantEmail, jsonResponse['account']['email']);
+
+    sharedPreferences.setInt(API.merchantId, jsonResponse['account']['ID']);
+    sharedPreferences.setString(API.shopId, jsonResponse['account']['shopID']);
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (BuildContext context) => MainScreen()),
+        (Route<dynamic> route) => false);
   } else {
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load data');
   }
 }

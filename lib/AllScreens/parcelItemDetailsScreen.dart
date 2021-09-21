@@ -25,7 +25,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
             Navigator.pop(context);
           },
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios_rounded,
             color: Colors.black,
           ),
         ),
@@ -81,7 +81,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                         style: TextStyle(
                                             fontSize: 16,
                                             color: Color.fromRGBO(
-                                                180, 180, 180, 1)),
+                                                121, 121, 121, 1)),
                                       ),
                                     ],
                                   ),
@@ -99,7 +99,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: Color.fromRGBO(
-                                                180, 180, 180, 1)),
+                                                121, 121, 121, 1)),
                                       ),
                                     ],
                                   ),
@@ -135,7 +135,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: Color.fromRGBO(
-                                                180, 180, 180, 1)),
+                                                121, 121, 121, 1)),
                                       ),
                                       SizedBox(
                                         width: 125,
@@ -156,7 +156,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: Color.fromRGBO(
-                                                180, 180, 180, 1)),
+                                                121, 121, 121, 1)),
                                       ),
                                       SizedBox(
                                         width: 125,
@@ -231,7 +231,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                       padding: const EdgeInsets.only(
                           top: 10.0, bottom: 10.0, left: 10.0, right: 10.0),
                       child: Container(
-                        height: 300,
+                        height: 350,
                         padding: EdgeInsets.only(left: 30, right: 20, top: 10),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -280,7 +280,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Color.fromRGBO(
-                                                      180, 180, 180, 1)),
+                                                      121, 121, 121, 1)),
                                             ),
                                           ],
                                         ),
@@ -326,7 +326,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Color.fromRGBO(
-                                                      180, 180, 180, 1)),
+                                                      121, 121, 121, 1)),
                                             ),
                                           ],
                                         ),
@@ -372,7 +372,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Color.fromRGBO(
-                                                      180, 180, 180, 1)),
+                                                      121, 121, 121, 1)),
                                             ),
                                           ],
                                         ),
@@ -418,7 +418,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Color.fromRGBO(
-                                                      180, 180, 180, 1)),
+                                                      121, 121, 121, 1)),
                                             ),
                                           ],
                                         ),
@@ -464,7 +464,7 @@ class _ParcelItemDetailsScreenState extends State<ParcelItemDetailsScreen> {
                                               style: TextStyle(
                                                   fontSize: 12,
                                                   color: Color.fromRGBO(
-                                                      180, 180, 180, 1)),
+                                                      121, 121, 121, 1)),
                                             ),
                                           ],
                                         ),

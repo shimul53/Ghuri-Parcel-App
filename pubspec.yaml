@@ -38,6 +38,7 @@ dependencies:
   intl: ^0.17.0
   webview_flutter: ^2.0.12
   flutter_glow: ^0.2.0
+  flutter_otp_text_field: ^1.0.0
 
 
 dev_dependencies:
@@ -78,6 +79,7 @@ flutter:
     - images/calendar_deselect.png
     - images/invoice_deselect.png
     - images/instructions_deselect.png
+    - images/area_deselect.png
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,7 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:ghuri_parcel_app/AllScreens/loginScreen.dart';
+import 'package:ghuri_parcel_app/Models/checkOtp_model.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class OTPScreen extends StatefulWidget {
   static const String idScreen = "otp";
@@ -11,6 +18,13 @@ class OTPScreen extends StatefulWidget {
 }
 
 class _OTPScreenState extends State<OTPScreen> {
+  CheckOtpRequestModel? checkOtpRequestModel;
+  TextEditingController otpPin1Controller = TextEditingController();
+  TextEditingController otpPin2Controller = TextEditingController();
+  TextEditingController otpPin3Controller = TextEditingController();
+  TextEditingController otpPin4Controller = TextEditingController();
+  TextEditingController otpPin5Controller = TextEditingController();
+  TextEditingController otpPin6Controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +35,12 @@ class _OTPScreenState extends State<OTPScreen> {
             top: 70.0,
             left: 10.0,
             child: GestureDetector(
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) => LoginScreen()),
+                    (Route<dynamic> route) => false);
+              },
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.black,
@@ -51,7 +70,7 @@ class _OTPScreenState extends State<OTPScreen> {
           ),
           Positioned(
             top: 100.0,
-            left: 10.0,
+            left: 20.0,
             child: Column(
               children: [
                 SizedBox(
@@ -73,12 +92,14 @@ class _OTPScreenState extends State<OTPScreen> {
                 SizedBox(
                   height: 25,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 10),
+                Center(
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _textFieldOTP(first: true, last: false),
+                        _textFieldOTP(
+                          first: true,
+                          last: false,
+                        ),
                         SizedBox(
                           width: 10,
                         ),
@@ -108,8 +129,10 @@ class _OTPScreenState extends State<OTPScreen> {
                   width: 330,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamedAndRemoveUntil(
-                          context, LoginScreen.idScreen, (route) => false);
+                      // checkOtp(_textFieldOTP.toString(), context);
+
+                      // Navigator.pushNamedAndRemoveUntil(
+                      //     context, LoginScreen.idScreen, (route) => false);
                     },
                     style: ButtonStyle(
                       shadowColor: MaterialStateProperty.all<Color>(
@@ -149,13 +172,26 @@ class _OTPScreenState extends State<OTPScreen> {
     );
   }
 
-  Widget _textFieldOTP({bool? first, last}) {
+  Widget _textFieldOTP({
+    bool? first,
+    last,
+  }) {
     return Container(
       height: 85,
       child: AspectRatio(
         aspectRatio: 0.6,
         child: TextField(
           autofocus: true,
+          onSubmitted: (String verificationCode) {
+            showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("Verification Code"),
+                    content: Text('Code entered is $verificationCode'),
+                  );
+                });
+          },
           onChanged: (value) {
             if (value.length == 1 && last == false) {
               FocusScope.of(context).nextFocus();
@@ -186,5 +222,34 @@ class _OTPScreenState extends State<OTPScreen> {
         ),
       ),
     );
+  }
+}
+
+checkOtp(String otpNumber, BuildContext context) async {
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  String url = API.checkOtpUrl;
+
+  var response = await http.post(Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        "otp": otpNumber,
+      }));
+  print(response.body);
+  var jsonResponse;
+  if (response.statusCode == 200) {
+    jsonResponse = json.decode(response.body);
+    print(response.body);
+    if (response.body != null) {
+      print(response.body);
+
+      sharedPreferences.setString("token", jsonResponse['token']);
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
+          (Route<dynamic> route) => false);
+    } else {
+      throw Exception('Failed to load');
+    }
   }
 }

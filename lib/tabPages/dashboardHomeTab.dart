@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class DashboardHomeTab extends StatefulWidget {
@@ -9,6 +11,20 @@ class DashboardHomeTab extends StatefulWidget {
 }
 
 class _DashboardHomeTabState extends State<DashboardHomeTab> {
+  @override
+  void initState() {
+    super.initState();
+    getDashboardItem();
+  }
+
+  String? _merchantName;
+  getDashboardItem() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      _merchantName = (sharedPreferences.getString(API.merchantName) ?? '');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final List<ChartData> chartData = [
@@ -73,7 +89,7 @@ class _DashboardHomeTabState extends State<DashboardHomeTab> {
                       height: 10.0,
                     ),
                     Text(
-                      "Shimul Tamo",
+                      "$_merchantName",
                       style: TextStyle(
                         color: Color.fromRGBO(87, 87, 87, 1),
                         fontWeight: FontWeight.bold,
@@ -87,7 +103,7 @@ class _DashboardHomeTabState extends State<DashboardHomeTab> {
           ),
           Padding(
             padding: const EdgeInsets.only(
-                top: 10.0, bottom: 40.0, left: 20.0, right: 20.0),
+                top: 10.0, bottom: 20.0, left: 20.0, right: 20.0),
             child: Container(
               height: 400,
               padding: EdgeInsets.symmetric(horizontal: 20.0),

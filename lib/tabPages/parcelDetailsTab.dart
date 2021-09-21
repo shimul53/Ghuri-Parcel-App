@@ -130,6 +130,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           "images/calendar_deselect.png",
                                           height: 10,
                                           width: 10,
+                                          color: Colors.black,
                                         )
                                       ],
                                     ),
@@ -193,6 +194,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           "images/calendar_deselect.png",
                                           height: 10,
                                           width: 10,
+                                          color: Colors.black,
                                         )
                                       ],
                                     ),
@@ -306,7 +308,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 16,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         ),
                                       ],
                                     ),
@@ -370,7 +372,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         )
                                       ],
                                     ),
@@ -479,7 +481,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 16,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         ),
                                       ],
                                     ),
@@ -543,7 +545,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         )
                                       ],
                                     ),
@@ -652,7 +654,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 16,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         ),
                                       ],
                                     ),
@@ -716,7 +718,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           style: TextStyle(
                                               fontSize: 14,
                                               color: Color.fromRGBO(
-                                                  180, 180, 180, 1)),
+                                                  121, 121, 121, 1)),
                                         )
                                       ],
                                     ),

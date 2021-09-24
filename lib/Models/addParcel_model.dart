@@ -26,27 +26,36 @@ class AddParcelRequestModel {
   int? productWeight;
   int? productType;
   String? instruction;
-  String? merchantID;
+  int? merchantID;
   String? shopID;
+  String? trackId;
+  int? parcelStatus;
+  int? ghuriCharge;
+  int? receivableAmount;
+  String? parcelCreateDateTime;
 
-  AddParcelRequestModel({
-    this.invoiceNumber,
-    this.pickupDate,
-    this.pickupAddress,
-    this.customerName,
-    this.customerNumber,
-    this.alternativeNumber,
-    this.deliveryAddress,
-    this.customerArea,
-    this.payable,
-    this.customerPayableAmount,
-    this.deliveryType,
-    this.productWeight,
-    this.productType,
-    this.instruction,
-    this.merchantID,
-    this.shopID,
-  });
+  AddParcelRequestModel(
+      {this.invoiceNumber,
+      this.pickupDate,
+      this.pickupAddress,
+      this.customerName,
+      this.customerNumber,
+      this.alternativeNumber,
+      this.deliveryAddress,
+      this.customerArea,
+      this.payable,
+      this.customerPayableAmount,
+      this.deliveryType,
+      this.productWeight,
+      this.productType,
+      this.instruction,
+      this.merchantID,
+      this.shopID,
+      this.trackId,
+      this.parcelStatus,
+      this.ghuriCharge,
+      this.receivableAmount,
+      this.parcelCreateDateTime});
   factory AddParcelRequestModel.fromJson(Map<String, dynamic> json) {
     return AddParcelRequestModel(
       merchantID: json["merchantID"],
@@ -65,6 +74,11 @@ class AddParcelRequestModel {
       payable: json["payable"],
       customerPayableAmount: json["customerPayableAmount"],
       instruction: json["instruction"],
+      trackId: json["trackID"],
+      parcelStatus: json["status"],
+      ghuriCharge: json["ghuriCharge"],
+      receivableAmount: json["receivableAmount"],
+      parcelCreateDateTime: json["parcelCreateDateTime"],
     );
   }
 }

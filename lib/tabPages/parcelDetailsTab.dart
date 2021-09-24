@@ -1,22 +1,103 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_glow/flutter_glow.dart';
+import 'package:ghuri_parcel_app/AllScreens/listviewItem.dart';
 import 'package:ghuri_parcel_app/AllScreens/parcelDetailsSearchScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/parcelItemDetailsScreen.dart';
+import 'package:ghuri_parcel_app/Models/addParcel_model.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+int? _merchantId;
+String? _bearerToken;
+String? _firstDate;
+String _firstDateValue = "";
+DateTime? _selectedDate;
+
+String? _firstDateInput;
+String? _lastDateInput;
 
 class ParcelDetailsTab extends StatefulWidget {
-  const ParcelDetailsTab({Key? key}) : super(key: key);
-
   @override
   _ParcelDetailsTabState createState() => _ParcelDetailsTabState();
 }
 
 class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
+  int? selectedIndex;
+
   DateTime? firstDate;
   DateTime? lastDate;
-
   final dateFormat = DateFormat('yyyy-MM-dd');
+
+  _firstDate() {
+    if (firstDate == null) {
+      setState(() {
+        _firstDateInput = dateFormat.format(DateTime.now());
+      });
+    } else {
+      setState(() {
+        _firstDateInput = dateFormat.format(firstDate!);
+      });
+    }
+    return _firstDateInput;
+  }
+
+  _lastDate() {
+    if (lastDate == null) {
+      setState(() {
+        _lastDateInput = dateFormat.format(DateTime.now());
+      });
+    } else {
+      setState(() {
+        _lastDateInput = dateFormat.format(lastDate!);
+      });
+    }
+    return _lastDateInput;
+  }
+
+  getListItem() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      _merchantId = (sharedPreferences.getInt(API.merchantId));
+    });
+  }
+
+  Future<List<AddParcelRequestModel>?>? futureData;
+
+  @override
+  void initState() {
+    super.initState();
+    _firstDate();
+    _lastDate();
+    getListItem();
+    // searchParcel();
+  }
+
+  bool _isSearchItemVisible = false;
+  searchParcel() {
+    if (_firstDateInput != null ||
+        _lastDateInput != null ||
+        _merchantId != null) {
+      setState(() {
+        _isSearchItemVisible = true;
+        _firstDate();
+        _lastDate();
+        getListItem();
+        parcelList();
+        futureData = parcelList();
+      });
+    } else {
+      setState(() {
+        _isSearchItemVisible = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,7 +181,6 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                           firstDate = value;
                                         });
                                       });
-                                      ;
                                     },
                                     shape: new RoundedRectangleBorder(
                                         borderRadius:
@@ -110,11 +190,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                         Center(
                                           child: Center(
                                             child: Text(
-                                              (firstDate == null)
-                                                  ? dateFormat
-                                                      .format(DateTime.now())
-                                                  : dateFormat
-                                                      .format(firstDate!),
+                                              _firstDate(),
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 color: Colors.black,
@@ -174,11 +250,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                         Center(
                                           child: Center(
                                             child: Text(
-                                              (lastDate == null)
-                                                  ? dateFormat
-                                                      .format(DateTime.now())
-                                                  : dateFormat
-                                                      .format(lastDate!),
+                                              _lastDate(),
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 color: Colors.black,
@@ -212,12 +284,22 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                 height: 40,
                                 width: 107,
                                 child: Center(
-                                  child: Text(
-                                    "Search",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.0,
+                                  child: FlatButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _firstDate();
+                                        _lastDate();
+                                        searchParcel();
+                                        parcelList();
+                                      });
+                                    },
+                                    child: Text(
+                                      "Search",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.0,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -233,536 +315,995 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Container(
-                child: Column(
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            (context),
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ParcelItemDetailsScreen()));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 30.0, bottom: 10.0, left: 5.0, right: 5.0),
-                        child: Container(
-                          height: 200,
-                          padding: EdgeInsets.only(left: 10, right: 5, top: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20.0),
-                              topRight: Radius.circular(20.0),
-                              bottomLeft: Radius.circular(20.0),
-                              bottomRight: Radius.circular(20.0),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "TrackID: GP759044",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 120,
-                                    ),
-                                    Card(
-                                      color: Color.fromRGBO(255, 204, 0, 1),
-                                      child: SizedBox(
-                                        height: 30,
-                                        width: 80,
-                                        child: Center(
-                                          child: Text(
-                                            "Pending",
-                                            textAlign: TextAlign.center,
+              child: FutureBuilder<List<AddParcelRequestModel>?>(
+            future: futureData,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<AddParcelRequestModel>? data = snapshot.data;
+
+                return ListView.builder(
+                    itemCount: data!.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                              (context),
+                              MaterialPageRoute(
+                                  builder: (context) => Scaffold(
+                                        backgroundColor:
+                                            Color.fromRGBO(237, 237, 237, 1),
+                                        appBar: AppBar(
+                                          backgroundColor: Colors.white,
+                                          title: Text(
+                                            "Parcel Details",
                                             style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.black),
+                                          ),
+                                          leading: IconButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            icon: Icon(
+                                              Icons.arrow_back_ios_rounded,
                                               color: Colors.black,
-                                              fontSize: 14.0,
+                                            ),
+                                          ),
+                                        ),
+                                        body: Column(
+                                          children: [
+                                            Expanded(
+                                              child: SingleChildScrollView(
+                                                child: Container(
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                top: 10.0,
+                                                                bottom: 10.0,
+                                                                left: 10.0,
+                                                                right: 10.0),
+                                                        child: Container(
+                                                          height: 245,
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 30,
+                                                                  right: 20,
+                                                                  top: 10),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topLeft: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              topRight: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              bottomLeft: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              bottomRight:
+                                                                  Radius
+                                                                      .circular(
+                                                                          20.0),
+                                                            ),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 10),
+                                                            child: Column(
+                                                              children: [
+                                                                Row(
+                                                                  children: [
+                                                                    Column(
+                                                                      children: [
+                                                                        Text(
+                                                                          "TrackID: ${data[index].trackId}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 16,
+                                                                              color: Colors.black),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Invoice Number: ${data[index].invoiceNumber}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 16,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Product Type: ${data[index].productType == 1 ? "GLASS"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 2 ? "WOODEN"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 3 ? "METAL"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 4 ? "DRESS"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 5 ? "COSMETIC"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 6 ? "JEWELLERY"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 7 ? "BOOK"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : data[index].productType == 8 ? "DOCUMENT"
+                                                                              "/"
+                                                                              "${data[index].productWeight}kg" : "0"}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Price: ${data[index].customerPayableAmount}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 15,
+                                                                              color: Color.fromRGBO(204, 0, 0, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Ghuri Charge: ${data[index].ghuriCharge}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              125,
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Receivable Amount: ${data[index].receivableAmount}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              125,
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Name: ${data[index].customerName}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Mobile: ${data[index].customerNumber}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 5,
+                                                                ),
+                                                                Column(
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          "Address:${data[index].deliveryAddress} , ${data[index].customerArea}",
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              125,
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                    .only(
+                                                                top: 10.0,
+                                                                bottom: 10.0,
+                                                                left: 10.0,
+                                                                right: 10.0),
+                                                        child: Container(
+                                                          height: 350,
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 30,
+                                                                  right: 20,
+                                                                  top: 10),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .only(
+                                                              topLeft: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              topRight: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              bottomLeft: Radius
+                                                                  .circular(
+                                                                      20.0),
+                                                              bottomRight:
+                                                                  Radius
+                                                                      .circular(
+                                                                          20.0),
+                                                            ),
+                                                          ),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 10),
+                                                            child: Column(
+                                                              children: [
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      size: 30,
+                                                                      color: Color
+                                                                          .fromRGBO(
+                                                                              255,
+                                                                              204,
+                                                                              0,
+                                                                              1),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 30,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'Pending',
+                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                '8 Aug 2021 12:00 PM',
+                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 30,
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      size: 30,
+                                                                      color: Color.fromRGBO(
+                                                                          180,
+                                                                          180,
+                                                                          180,
+                                                                          1),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 30,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'On Pickup',
+                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'waiting...',
+                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 30,
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      size: 30,
+                                                                      color: Color.fromRGBO(
+                                                                          180,
+                                                                          180,
+                                                                          180,
+                                                                          1),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 30,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'Picked Up',
+                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'waiting...',
+                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 30,
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      size: 30,
+                                                                      color: Color.fromRGBO(
+                                                                          180,
+                                                                          180,
+                                                                          180,
+                                                                          1),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 30,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'In Hub',
+                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'waiting...',
+                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 30,
+                                                                ),
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <
+                                                                      Widget>[
+                                                                    Icon(
+                                                                      Icons
+                                                                          .check_circle,
+                                                                      size: 30,
+                                                                      color: Color.fromRGBO(
+                                                                          180,
+                                                                          180,
+                                                                          180,
+                                                                          1),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 30,
+                                                                    ),
+                                                                    Expanded(
+                                                                      child:
+                                                                          Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.start,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'On Delivery',
+                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'waiting...',
+                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 10,
+                                                      ),
+                                                      Container(
+                                                        child: Row(
+                                                          children: <Widget>[
+                                                            Expanded(
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .all(
+                                                                        8.0),
+                                                                child:
+                                                                    GlowButton(
+                                                                        height:
+                                                                            50,
+                                                                        borderRadius:
+                                                                            new BorderRadius.circular(
+                                                                                24.0),
+                                                                        color: Color.fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1),
+                                                                        glowColor: Color.fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1),
+                                                                        child:
+                                                                            Container(
+                                                                          height:
+                                                                              50.0,
+                                                                          child:
+                                                                              Center(
+                                                                            child:
+                                                                                Row(
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                              children: [
+                                                                                Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  children: [
+                                                                                    Image.asset(
+                                                                                      "images/deselect_Call.png",
+                                                                                      height: 20,
+                                                                                      width: 20,
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: 10,
+                                                                                ),
+                                                                                Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  children: [
+                                                                                    Text("Pick Up Man",
+                                                                                        style: TextStyle(
+                                                                                          fontSize: 16.0,
+                                                                                        )),
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        // shape: new RoundedRectangleBorder(
+                                                                        //   borderRadius:
+                                                                        //       new BorderRadius.circular(24.0),
+                                                                        // ),
+                                                                        // splashColor: Color.fromRGBO(255, 204, 0, 1),
+                                                                        // elevation: 10,
+                                                                        onPressed:
+                                                                            () {}),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                            .all(
+                                                                        8.0),
+                                                                child:
+                                                                    GlowButton(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        height:
+                                                                            50,
+                                                                        borderRadius:
+                                                                            new BorderRadius.circular(
+                                                                                24.0),
+                                                                        glowColor:
+                                                                            Colors
+                                                                                .grey,
+                                                                        child:
+                                                                            Container(
+                                                                          height:
+                                                                              50.0,
+                                                                          child:
+                                                                              Center(
+                                                                            child:
+                                                                                Row(
+                                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                                              children: [
+                                                                                Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  children: [
+                                                                                    Image.asset(
+                                                                                      "images/deselect_Call.png",
+                                                                                      height: 20,
+                                                                                      width: 20,
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: 10,
+                                                                                ),
+                                                                                Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  children: [
+                                                                                    Text("Delivery Man",
+                                                                                        style: TextStyle(
+                                                                                          fontSize: 16.0,
+                                                                                        )),
+                                                                                  ],
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {}),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 50,
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              bottom: 10.0, left: 10.0, right: 10.0),
+                          child: Container(
+                            height: 200,
+                            padding:
+                                EdgeInsets.only(left: 10, right: 10, top: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20.0),
+                                topRight: Radius.circular(20.0),
+                                bottomLeft: Radius.circular(20.0),
+                                bottomRight: Radius.circular(20.0),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  top: 10, left: 10, right: 10),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            "TrackID: ${data[index].trackId}",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          ),
+                                        ],
+                                      ),
+                                      Card(
+                                        color: Color.fromRGBO(255, 204, 0, 1),
+                                        child: SizedBox(
+                                          height: 30,
+                                          width: 80,
+                                          child: Center(
+                                            child: Text(
+                                              data[index].parcelStatus == 0
+                                                  ? "Pending"
+                                                  : data[index].parcelStatus ==
+                                                          1
+                                                      ? "On Pickup"
+                                                      : data[index]
+                                                                  .parcelStatus ==
+                                                              2
+                                                          ? "Picked Up"
+                                                          : data[index]
+                                                                      .parcelStatus ==
+                                                                  3
+                                                              ? "In Hub"
+                                                              : data[index]
+                                                                          .parcelStatus ==
+                                                                      4
+                                                                  ? "On Delivery"
+                                                                  : "Delivered",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 14.0,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Invoice Number: 01",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          "images/calendar_deselect.png",
-                                          height: 20,
-                                          width: 20,
-                                          color: Color.fromRGBO(204, 0, 0, 1),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "2021-08-08",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        ),
-                                        SizedBox(
-                                          width: 190,
-                                        ),
-                                        Text(
-                                          "1000tk",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Name: Shimul Tamo",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "Delivery: 70tk",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Mobile: 01752438061",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "GLASS/2 kg",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            (context),
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ParcelItemDetailsScreen()));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 10.0, bottom: 10.0, left: 5.0, right: 5.0),
-                        child: Container(
-                          height: 200,
-                          padding: EdgeInsets.only(left: 10, right: 5, top: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20.0),
-                              topRight: Radius.circular(20.0),
-                              bottomLeft: Radius.circular(20.0),
-                              bottomRight: Radius.circular(20.0),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "TrackID: GP759044",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 120,
-                                    ),
-                                    Card(
-                                      color: Color.fromRGBO(255, 204, 0, 1),
-                                      child: SizedBox(
-                                        height: 30,
-                                        width: 80,
-                                        child: Center(
-                                          child: Text(
-                                            "Pending",
-                                            textAlign: TextAlign.center,
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "Invoice Number: ${data[index].invoiceNumber}",
                                             style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14.0,
-                                            ),
+                                                fontSize: 16,
+                                                color: Color.fromRGBO(
+                                                    121, 121, 121, 1)),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Invoice Number: 01",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          "images/calendar_deselect.png",
-                                          height: 20,
-                                          width: 20,
-                                          color: Color.fromRGBO(204, 0, 0, 1),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "2021-08-08",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        ),
-                                        SizedBox(
-                                          width: 190,
-                                        ),
-                                        Text(
-                                          "1000tk",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Name: Shimul Tamo",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "Delivery: 70tk",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Mobile: 01752438061",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "GLASS/2 kg",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                            (context),
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    ParcelItemDetailsScreen()));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 10.0, bottom: 10.0, left: 5.0, right: 5.0),
-                        child: Container(
-                          height: 200,
-                          padding: EdgeInsets.only(left: 10, right: 5, top: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20.0),
-                              topRight: Radius.circular(20.0),
-                              bottomLeft: Radius.circular(20.0),
-                              bottomRight: Radius.circular(20.0),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 10),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "TrackID: GP759044",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 120,
-                                    ),
-                                    Card(
-                                      color: Color.fromRGBO(255, 204, 0, 1),
-                                      child: SizedBox(
-                                        height: 30,
-                                        width: 80,
-                                        child: Center(
-                                          child: Text(
-                                            "Pending",
-                                            textAlign: TextAlign.center,
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Image.asset(
+                                                "images/calendar_deselect.png",
+                                                height: 20,
+                                                width: 20,
+                                                color: Color.fromRGBO(
+                                                    204, 0, 0, 1),
+                                              ),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                "${data[index].pickupDate}",
+                                                style: TextStyle(
+                                                    fontSize: 15,
+                                                    color: Color.fromRGBO(
+                                                        204, 0, 0, 1)),
+                                              ),
+                                            ],
+                                          ),
+                                          Text(
+                                            "${data[index].customerPayableAmount}tk",
                                             style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 14.0,
-                                            ),
-                                          ),
-                                        ),
+                                                fontSize: 15,
+                                                color: Color.fromRGBO(
+                                                    204, 0, 0, 1)),
+                                          )
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Invoice Number: 01",
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Image.asset(
-                                          "images/calendar_deselect.png",
-                                          height: 20,
-                                          width: 20,
-                                          color: Color.fromRGBO(204, 0, 0, 1),
-                                        ),
-                                        SizedBox(
-                                          width: 5,
-                                        ),
-                                        Text(
-                                          "2021-08-08",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        ),
-                                        SizedBox(
-                                          width: 190,
-                                        ),
-                                        Text(
-                                          "1000tk",
-                                          style: TextStyle(
-                                              fontSize: 15,
-                                              color:
-                                                  Color.fromRGBO(204, 0, 0, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Name: Shimul Tamo",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "Delivery: 70tk",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Color.fromRGBO(
-                                                  121, 121, 121, 1)),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          "Mobile: 01752438061",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        ),
-                                        SizedBox(
-                                          width: 125,
-                                        ),
-                                        Text(
-                                          "GLASS/2 kg",
-                                          style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Name: ${data[index].customerName}",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black),
+                                          ),
+                                          Text(
+                                            "Delivery: ${data[index].ghuriCharge}",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Color.fromRGBO(
+                                                    121, 121, 121, 1)),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "Mobile: ${data[index].customerNumber}",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black),
+                                          ),
+                                          Text(
+                                            data[index].productType == 1
+                                                ? "GLASS"
+                                                    "/"
+                                                    "${data[index].productWeight}kg"
+                                                : data[index].productType == 2
+                                                    ? "WOODEN"
+                                                        "/"
+                                                        "${data[index].productWeight}kg"
+                                                    : data[index].productType ==
+                                                            3
+                                                        ? "METAL"
+                                                            "/"
+                                                            "${data[index].productWeight}kg"
+                                                        : data[index]
+                                                                    .productType ==
+                                                                4
+                                                            ? "DRESS"
+                                                                "/"
+                                                                "${data[index].productWeight}kg"
+                                                            : data[index]
+                                                                        .productType ==
+                                                                    5
+                                                                ? "COSMETIC"
+                                                                    "/"
+                                                                    "${data[index].productWeight}kg"
+                                                                : data[index]
+                                                                            .productType ==
+                                                                        6
+                                                                    ? "JEWELLERY"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg"
+                                                                    : data[index].productType ==
+                                                                            7
+                                                                        ? "BOOK"
+                                                                            "/"
+                                                                            "${data[index].productWeight}kg"
+                                                                        : data[index].productType ==
+                                                                                8
+                                                                            ? "DOCUMENT"
+                                                                                "/"
+                                                                                "${data[index].productWeight}kg"
+                                                                            : "0",
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+                      );
+                    });
+              } else if (snapshot.hasError) {
+                return Text("${snapshot.error}");
+              }
+
+              return Container();
+            },
+          )),
         ],
       ),
     );
+  }
+}
+
+Future<List<AddParcelRequestModel>?> parcelList() async {
+  String url = API.parcelList +
+      "$_merchantId" +
+      "&" +
+      "start_date=$_firstDateInput" "T00:00:01Z" +
+      "&" +
+      "end_date=$_lastDateInput" "T23:59:59Z" +
+      "&" "id=$_merchantId&department=2";
+
+  var response = await http.get(
+    Uri.parse(url),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization':
+          'Basic UjJoMWNtbEZlSEJ5WlhOTVZFUTpVMk55WldOMFMwVlpaMmgxY21sRldGQlNSVk5UVEZSRQ==',
+    },
+  );
+
+  if (response.statusCode == 200) {
+    Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+    List<dynamic> data = jsonResponse["parcels"];
+
+    return data
+        .map((data) => new AddParcelRequestModel.fromJson(data))
+        .toList();
+  } else {
+    throw Exception('Unexpected error occured!');
   }
 }

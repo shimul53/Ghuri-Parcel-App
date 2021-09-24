@@ -1020,7 +1020,7 @@ parcelRegister(
   String instruction,
 ) async {
   String url = API.parcelRegisterUrl + "$_merchantId";
-
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   var parcelData = jsonEncode(<String, dynamic>{
     "merchantID": _merchantId,
     'shopID': _shopId,
@@ -1055,7 +1055,10 @@ parcelRegister(
   var jsonResponse;
   if (response.statusCode == 200) {
     jsonResponse = json.decode(response.body);
-
+    sharedPreferences.setString(
+      API.parcelTrackId,
+      jsonResponse['tracking_id'],
+    );
     print(jsonResponse);
   } else {
     throw Exception('Failed to load data');

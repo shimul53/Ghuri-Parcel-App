@@ -14,6 +14,8 @@ class API {
   static final String merchantDetailsUrl =
       baseUrl + "v1/merchant/3?type=1&role=1&department=2&id=3";
 
+  static final String parcelList = baseUrl + "v1/parcel/list?merchant_id=";
+
   //shared pref
   static final String token = 'token';
   static final String merchantAddress = 'merchantAddress';
@@ -22,4 +24,5 @@ class API {
   static final String shopId = 'shopID';
   static final String merchantPhone = 'merchantPhone';
   static final String merchantEmail = 'merchantEmail';
+  static final String parcelTrackId = 'tracking_id';
 }

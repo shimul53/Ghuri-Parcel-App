@@ -65,14 +65,6 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
   }
 
   @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    // searchListItem();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(237, 237, 237, 1),

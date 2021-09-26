@@ -27,7 +27,8 @@ class ParcelDetailsTab extends StatefulWidget {
   _ParcelDetailsTabState createState() => _ParcelDetailsTabState();
 }
 
-class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
+class _ParcelDetailsTabState extends State<ParcelDetailsTab>
+    with AutomaticKeepAliveClientMixin<ParcelDetailsTab> {
   int? selectedIndex;
 
   DateTime? firstDate;
@@ -70,12 +71,16 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
   Future<List<AddParcelRequestModel>?>? futureData;
 
   @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _firstDate();
     _lastDate();
     getListItem();
-    // searchParcel();
+    //searchParcel();
   }
 
   bool _isSearchItemVisible = false;
@@ -639,11 +644,26 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                                                       Icons
                                                                           .check_circle,
                                                                       size: 30,
-                                                                      color: Color
-                                                                          .fromRGBO(
+                                                                      color: data[index].parcelStatus == 0 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  1 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  2 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  3 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  4 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  5
+                                                                          ? Color.fromRGBO(
                                                                               255,
                                                                               204,
                                                                               0,
+                                                                              1)
+                                                                          : Color.fromRGBO(
+                                                                              180,
+                                                                              180,
+                                                                              180,
                                                                               1),
                                                                     ),
                                                                     SizedBox(
@@ -692,11 +712,25 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                                                       Icons
                                                                           .check_circle,
                                                                       size: 30,
-                                                                      color: Color.fromRGBO(
-                                                                          180,
-                                                                          180,
-                                                                          180,
-                                                                          1),
+                                                                      color: data[index].parcelStatus == 1 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  2 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  3 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  4 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  5
+                                                                          ? Color.fromRGBO(
+                                                                              255,
+                                                                              204,
+                                                                              0,
+                                                                              1)
+                                                                          : Color.fromRGBO(
+                                                                              180,
+                                                                              180,
+                                                                              180,
+                                                                              1),
                                                                     ),
                                                                     SizedBox(
                                                                       width: 30,
@@ -744,11 +778,23 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                                                       Icons
                                                                           .check_circle,
                                                                       size: 30,
-                                                                      color: Color.fromRGBO(
-                                                                          180,
-                                                                          180,
-                                                                          180,
-                                                                          1),
+                                                                      color: data[index].parcelStatus == 2 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  3 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  4 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  5
+                                                                          ? Color.fromRGBO(
+                                                                              255,
+                                                                              204,
+                                                                              0,
+                                                                              1)
+                                                                          : Color.fromRGBO(
+                                                                              180,
+                                                                              180,
+                                                                              180,
+                                                                              1),
                                                                     ),
                                                                     SizedBox(
                                                                       width: 30,
@@ -796,11 +842,21 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                                                       Icons
                                                                           .check_circle,
                                                                       size: 30,
-                                                                      color: Color.fromRGBO(
-                                                                          180,
-                                                                          180,
-                                                                          180,
-                                                                          1),
+                                                                      color: data[index].parcelStatus == 3 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  4 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  5
+                                                                          ? Color.fromRGBO(
+                                                                              255,
+                                                                              204,
+                                                                              0,
+                                                                              1)
+                                                                          : Color.fromRGBO(
+                                                                              180,
+                                                                              180,
+                                                                              180,
+                                                                              1),
                                                                     ),
                                                                     SizedBox(
                                                                       width: 30,
@@ -848,11 +904,19 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab> {
                                                                       Icons
                                                                           .check_circle,
                                                                       size: 30,
-                                                                      color: Color.fromRGBO(
-                                                                          180,
-                                                                          180,
-                                                                          180,
-                                                                          1),
+                                                                      color: data[index].parcelStatus == 4 ||
+                                                                              data[index].parcelStatus ==
+                                                                                  5
+                                                                          ? Color.fromRGBO(
+                                                                              255,
+                                                                              204,
+                                                                              0,
+                                                                              1)
+                                                                          : Color.fromRGBO(
+                                                                              180,
+                                                                              180,
+                                                                              180,
+                                                                              1),
                                                                     ),
                                                                     SizedBox(
                                                                       width: 30,

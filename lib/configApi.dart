@@ -15,7 +15,8 @@ class API {
       baseUrl + "v1/merchant/3?type=1&role=1&department=2&id=3";
 
   static final String parcelList = baseUrl + "v1/parcel/list?merchant_id=";
-
+  static final String? bearerToken =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySWQiOjEsIlVzZXJUeXBlIjoxLCJVc2VyUm9sZSI6MSwiRGVwYXJ0bWVudFR5cGUiOjEsIlVzZXJOYW1lIjoiYWRtaW4iLCJQaG9uZSI6IjAxOTAzNjc0NzY5IiwiSHViTmFtZSI6IiIsIkVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIn0.a_SvaY1gt1ai9QFYgQNxmBPFzamdobLmXsbcm4rx-_w";
   //shared pref
   static final String token = 'token';
   static final String merchantAddress = 'merchantAddress';

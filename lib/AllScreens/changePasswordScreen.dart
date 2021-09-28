@@ -1,4 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:ghuri_parcel_app/AllScreens/loginScreen.dart';
+import 'package:ghuri_parcel_app/Models/registration_model.dart';
+import 'package:ghuri_parcel_app/configApi.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
+String? _bearerToken;
 
 class ChangePasswordScreen extends StatefulWidget {
   @override
@@ -6,6 +15,13 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  getItem() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    setState(() {
+      _bearerToken = (sharedPreferences.getString(API.token) ?? '');
+    });
+  }
+
   TextEditingController oldPasswordTextEditingController =
       TextEditingController();
 
@@ -14,6 +30,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   TextEditingController confirmPasswordTextEditingController =
       TextEditingController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    getItem();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,7 +201,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     splashColor: Color.fromRGBO(255, 204, 0, 1),
                     elevation: 10,
-                    onPressed: () {}),
+                    onPressed: () {
+                      updateProfile(
+                        oldPasswordTextEditingController.text.toString(),
+                        newPasswordTextEditingController.text.toString(),
+                        confirmPasswordTextEditingController.text.toString(),
+                        context,
+                      );
+                    }),
               ),
               SizedBox(
                 height: 80,
@@ -186,5 +218,32 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<RegistrationRequestModel> updateProfile(String oldPassword,
+    String password, String confirmPassword, BuildContext context) async {
+  String url = API.baseUrl + "v1/merchant/password_change";
+  print(url);
+  var response = await http.put(
+    Uri.parse(url),
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $_bearerToken',
+    },
+    body: jsonEncode(<String, String>{
+      'oldPassword': oldPassword,
+      'password': password,
+      'confirmPassword': confirmPassword,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
+        (Route<dynamic> route) => false);
+    return RegistrationRequestModel.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to update data');
   }
 }

@@ -12,6 +12,7 @@ import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 int? _merchantId;
 String? _bearerToken;
@@ -65,6 +66,7 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       _merchantId = (sharedPreferences.getInt(API.merchantId));
+      _bearerToken = (sharedPreferences.getString(API.token) ?? '');
     });
   }
 
@@ -1025,7 +1027,9 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                                                         // splashColor: Color.fromRGBO(255, 204, 0, 1),
                                                                         // elevation: 10,
                                                                         onPressed:
-                                                                            () {}),
+                                                                            () {
+                                                                          _launchCaller();
+                                                                        }),
                                                               ),
                                                             ),
                                                             Expanded(
@@ -1083,7 +1087,9 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                                                           ),
                                                                         ),
                                                                         onPressed:
-                                                                            () {}),
+                                                                            () {
+                                                                          _launchCaller();
+                                                                        }),
                                                               ),
                                                             ),
                                                           ],
@@ -1354,8 +1360,7 @@ Future<List<AddParcelRequestModel>?> parcelList() async {
     Uri.parse(url),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization':
-          'Basic UjJoMWNtbEZlSEJ5WlhOTVZFUTpVMk55WldOMFMwVlpaMmgxY21sRldGQlNSVk5UVEZSRQ==',
+      'Authorization': 'Bearer $_bearerToken',
     },
   );
 
@@ -1369,5 +1374,14 @@ Future<List<AddParcelRequestModel>?> parcelList() async {
         .toList();
   } else {
     throw Exception('Unexpected error occured!');
+  }
+}
+
+_launchCaller() async {
+  const url = "tel:";
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

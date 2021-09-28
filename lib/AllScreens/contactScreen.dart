@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intent/intent.dart' as android_intent;
+import 'package:intent/action.dart' as android_action;
 
 class ContactScreen extends StatefulWidget {
   @override
@@ -6,6 +9,14 @@ class ContactScreen extends StatefulWidget {
 }
 
 class _ContactScreenState extends State<ContactScreen> {
+  void launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      launch(url);
+    } else {
+      throw "Could not launch $url";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +78,9 @@ class _ContactScreenState extends State<ContactScreen> {
                       children: [
                         RaisedButton(
                           color: Color.fromRGBO(255, 204, 0, 1),
-                          onPressed: () {},
+                          onPressed: () {
+                            _launchCaller();
+                          },
                           child: Center(
                             child: Column(
                               children: [
@@ -96,5 +109,14 @@ class _ContactScreenState extends State<ContactScreen> {
         ],
       ),
     );
+  }
+}
+
+_launchCaller() async {
+  const url = "tel:91963852741";
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

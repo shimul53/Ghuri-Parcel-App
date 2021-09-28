@@ -23,6 +23,8 @@ class RegistrationRequestModel {
   String? address;
   String? msisdn;
   String? shopID;
+  String? oldPassword;
+  String? confirmPassword;
 
   RegistrationRequestModel(
       {this.merchantName,
@@ -35,7 +37,9 @@ class RegistrationRequestModel {
       this.area,
       this.address,
       this.msisdn,
-      this.shopID});
+      this.shopID,
+      this.oldPassword,
+      this.confirmPassword});
   factory RegistrationRequestModel.fromJson(Map<String, dynamic> json) {
     return RegistrationRequestModel(
         merchantName: json["merchantName"],
@@ -48,6 +52,8 @@ class RegistrationRequestModel {
         area: json["area"],
         address: json["address"],
         msisdn: json["msisdn"],
-        shopID: json["shopID"]);
+        shopID: json["shopID"],
+        oldPassword: json["oldPassword"],
+        confirmPassword: json["confirmPassword"]);
   }
 }

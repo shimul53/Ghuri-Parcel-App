@@ -6,6 +6,7 @@ import 'package:ghuri_parcel_app/Models/addParcel_model.dart';
 import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 String? _trackId;
 String? _parcel_trackId;
@@ -851,7 +852,9 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
                                                                       // ),
                                                                       // splashColor: Color.fromRGBO(255, 204, 0, 1),
                                                                       // elevation: 10,
-                                                                      onPressed: () {}),
+                                                                      onPressed: () {
+                                                                        _launchCaller();
+                                                                      }),
                                                                 ),
                                                               ),
                                                               Expanded(
@@ -901,7 +904,9 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                      onPressed: () {}),
+                                                                      onPressed: () {
+                                                                        _launchCaller();
+                                                                      }),
                                                                 ),
                                                               ),
                                                             ],
@@ -1182,5 +1187,14 @@ Future<List<AddParcelRequestModel>> parcelList() async {
         .toList();
   } else {
     throw Exception('Unexpected error occured!');
+  }
+}
+
+_launchCaller() async {
+  const url = "tel:";
+  if (await canLaunch(url)) {
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
   }
 }

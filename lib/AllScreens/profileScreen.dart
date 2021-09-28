@@ -103,7 +103,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 25,
-                                color: Color.fromRGBO(180, 180, 180, 1)),
+                                color: Color.fromRGBO(121, 121, 121, 1)),
                           ),
                           SizedBox(
                             height: 30.0,
@@ -221,7 +221,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       return Text("${snapshot.error}");
                     }
 
-                    return CircularProgressIndicator();
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 300),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
                   }),
             ),
           ),

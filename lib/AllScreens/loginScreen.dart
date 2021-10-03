@@ -11,7 +11,7 @@ import 'package:ghuri_parcel_app/AllScreens/otpScreen.dart';
 import 'package:ghuri_parcel_app/AllScreens/registrationScreen.dart';
 import 'package:ghuri_parcel_app/AllWidgets/customElevationColor.dart';
 import 'package:ghuri_parcel_app/Models/login_model.dart';
-import 'package:ghuri_parcel_app/api/api_service.dart';
+
 import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';

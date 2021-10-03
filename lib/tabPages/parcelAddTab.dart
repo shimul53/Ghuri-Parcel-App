@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:ghuri_parcel_app/AllWidgets/parcelSuccessDialog.dart';
+
 import 'package:ghuri_parcel_app/Models/addParcel_model.dart';
 import 'package:ghuri_parcel_app/Models/dropdownItemInfo.dart';
 import 'package:ghuri_parcel_app/Models/registration_model.dart';
@@ -104,7 +106,6 @@ class _ParcelAddTabState extends State<ParcelAddTab> {
   }
 
   String? _area;
-
   area() {
     if (cityTextEditingController.text == "Dhaka") {
       setState(() {
@@ -189,7 +190,6 @@ class _ParcelAddTabState extends State<ParcelAddTab> {
   }
 
   int _productType = 0;
-
   productType(String value) {
     if (value == "GLASS") {
       setState(() {
@@ -237,11 +237,6 @@ class _ParcelAddTabState extends State<ParcelAddTab> {
     });
   }
 
-  // @override
-  // void initState() {
-  //   pickupDateTextEditingController.text = "";
-  //   super.initState();
-  // }
   @override
   void initState() {
     super.initState();
@@ -987,7 +982,8 @@ class _ParcelAddTabState extends State<ParcelAddTab> {
                           _deliveryType.toInt(),
                           _productWeight.toInt(),
                           _productType.toInt(),
-                          instructionTextEditingController.text.toString());
+                          instructionTextEditingController.text.toString(),
+                          context);
 
                       clearInputData();
                     }),
@@ -1004,21 +1000,21 @@ class _ParcelAddTabState extends State<ParcelAddTab> {
 }
 
 parcelRegister(
-  String invoiceNumber,
-  String pickupDate,
-  String customerName,
-  String customerNumber,
-  String alternativeNumber,
-  String customerCity,
-  String customerArea,
-  String deliveryAddress,
-  bool payable,
-  int customerPayableAmount,
-  int deliveryType,
-  int productWeight,
-  int productType,
-  String instruction,
-) async {
+    String invoiceNumber,
+    String pickupDate,
+    String customerName,
+    String customerNumber,
+    String alternativeNumber,
+    String customerCity,
+    String customerArea,
+    String deliveryAddress,
+    bool payable,
+    int customerPayableAmount,
+    int deliveryType,
+    int productWeight,
+    int productType,
+    String instruction,
+    context) async {
   String url = API.parcelRegisterUrl + "$_merchantId";
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   var parcelData = jsonEncode(<String, dynamic>{
@@ -1059,6 +1055,12 @@ parcelRegister(
       API.parcelTrackId,
       jsonResponse['tracking_id'],
     );
+
+    showDialog(
+      context: context,
+      builder: (context) => ParcelSuccessDialog(),
+    );
+
     print(jsonResponse);
   } else {
     throw Exception('Failed to load data');

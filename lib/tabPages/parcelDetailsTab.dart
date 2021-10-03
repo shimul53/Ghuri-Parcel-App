@@ -4,11 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_glow/flutter_glow.dart';
-import 'package:ghuri_parcel_app/AllScreens/listviewItem.dart';
+
 import 'package:ghuri_parcel_app/AllScreens/parcelDetailsSearchScreen.dart';
-import 'package:ghuri_parcel_app/AllScreens/parcelItemDetailsScreen.dart';
+
+import 'package:ghuri_parcel_app/AllWidgets/progressDialog.dart';
 import 'package:ghuri_parcel_app/Models/addParcel_model.dart';
 import 'package:ghuri_parcel_app/configApi.dart';
+import 'package:ghuri_parcel_app/tabPages/paymentTab.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,9 +18,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 int? _merchantId;
 String? _bearerToken;
-String? _firstDate;
-String _firstDateValue = "";
-DateTime? _selectedDate;
 
 String? _firstDateInput;
 String? _lastDateInput;
@@ -31,7 +30,10 @@ class ParcelDetailsTab extends StatefulWidget {
 class _ParcelDetailsTabState extends State<ParcelDetailsTab>
     with AutomaticKeepAliveClientMixin<ParcelDetailsTab> {
   int? selectedIndex;
-
+  ValueNotifier<DateTime> _firstDateTimeNotifier =
+      ValueNotifier<DateTime>(DateTime.now());
+  ValueNotifier<DateTime> _lastDateTimeNotifier =
+      ValueNotifier<DateTime>(DateTime.now());
   DateTime? firstDate;
   DateTime? lastDate;
   final dateFormat = DateFormat('yyyy-MM-dd');
@@ -79,9 +81,10 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
   @override
   void initState() {
     super.initState();
+    getListItem();
     _firstDate();
     _lastDate();
-    getListItem();
+
     //searchParcel();
   }
 
@@ -92,11 +95,11 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
         _merchantId != null) {
       setState(() {
         _isSearchItemVisible = true;
+
         _firstDate();
         _lastDate();
         getListItem();
-        parcelList();
-        futureData = parcelList();
+        //  futureData = parcelList(context);
       });
     } else {
       setState(() {
@@ -174,7 +177,8 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                     onPressed: () {
                                       showDatePicker(
                                           context: context,
-                                          initialDate: DateTime.now(),
+                                          initialDate:
+                                              _firstDateTimeNotifier.value,
                                           firstDate: DateTime(2019),
                                           lastDate: DateTime(2500),
                                           builder: (BuildContext context,
@@ -183,9 +187,11 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                               data: ThemeData.dark(),
                                               child: child!,
                                             );
-                                          }).then((value) {
+                                          }).then((dateTime) {
+                                        _firstDateTimeNotifier.value =
+                                            dateTime!;
                                         setState(() {
-                                          firstDate = value;
+                                          firstDate = dateTime;
                                         });
                                       });
                                     },
@@ -234,7 +240,8 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                     onPressed: () {
                                       showDatePicker(
                                           context: context,
-                                          initialDate: DateTime.now(),
+                                          initialDate:
+                                              _lastDateTimeNotifier.value,
                                           firstDate: DateTime(2019),
                                           lastDate: DateTime(2500),
                                           builder: (BuildContext context,
@@ -243,9 +250,10 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                               data: ThemeData.dark(),
                                               child: child!,
                                             );
-                                          }).then((value) {
+                                          }).then((dateTime) {
+                                        _lastDateTimeNotifier.value = dateTime!;
                                         setState(() {
-                                          lastDate = value;
+                                          lastDate = dateTime;
                                         });
                                       });
                                     },
@@ -294,10 +302,10 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                   child: FlatButton(
                                     onPressed: () {
                                       setState(() {
+                                        searchParcel();
+                                        futureData = parcelList(context);
                                         _firstDate();
                                         _lastDate();
-                                        searchParcel();
-                                        parcelList();
                                       });
                                     },
                                     child: Text(
@@ -336,133 +344,388 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                           Navigator.push(
                               (context),
                               MaterialPageRoute(
-                                  builder: (context) => Scaffold(
-                                        backgroundColor:
-                                            Color.fromRGBO(237, 237, 237, 1),
-                                        appBar: AppBar(
-                                          backgroundColor: Colors.white,
-                                          title: Text(
-                                            "Parcel Details",
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                color: Colors.black),
-                                          ),
-                                          leading: IconButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            icon: Icon(
-                                              Icons.arrow_back_ios_rounded,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        body: Column(
-                                          children: [
-                                            Expanded(
-                                              child: SingleChildScrollView(
-                                                child: Container(
-                                                  child: Column(
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .only(
-                                                                top: 10.0,
-                                                                bottom: 10.0,
-                                                                left: 10.0,
-                                                                right: 10.0),
-                                                        child: Container(
-                                                          height: 245,
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  left: 30,
-                                                                  right: 20,
-                                                                  top: 10),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.white,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .only(
-                                                              topLeft: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              topRight: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              bottomRight:
-                                                                  Radius
-                                                                      .circular(
-                                                                          20.0),
-                                                            ),
+                                builder: (context) => Scaffold(
+                                  backgroundColor:
+                                      Color.fromRGBO(237, 237, 237, 1),
+                                  appBar: AppBar(
+                                    backgroundColor: Colors.white,
+                                    title: Text(
+                                      "Parcel Details",
+                                      style: TextStyle(
+                                          fontSize: 20, color: Colors.black),
+                                    ),
+                                    leading: IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icon(
+                                        Icons.arrow_back_ios_rounded,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  body: Column(
+                                    children: [
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          child: Container(
+                                            child: Column(
+                                              children: [
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 10.0,
+                                                          bottom: 10.0,
+                                                          left: 10.0,
+                                                          right: 10.0),
+                                                  child: Container(
+                                                    height: 245,
+                                                    padding: EdgeInsets.only(
+                                                        left: 30,
+                                                        right: 20,
+                                                        top: 10),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        topRight:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        bottomLeft:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        bottomRight:
+                                                            Radius.circular(
+                                                                20.0),
+                                                      ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 10),
+                                                      child: Column(
+                                                        children: [
+                                                          Row(
+                                                            children: [
+                                                              Column(
+                                                                children: [
+                                                                  Text(
+                                                                    "TrackID: ${data[index].trackId}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        color: Colors
+                                                                            .black),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
                                                           ),
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    top: 10),
-                                                            child: Column(
-                                                              children: [
-                                                                Row(
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Invoice Number: ${data[index].invoiceNumber}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        color: Color.fromRGBO(
+                                                                            121,
+                                                                            121,
+                                                                            121,
+                                                                            1)),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Product Type: ${data[index].productType == 1 ? "GLASS"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 2 ? "WOODEN"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 3 ? "METAL"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 4 ? "DRESS"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 5 ? "COSMETIC"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 6 ? "JEWELLERY"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 7 ? "BOOK"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : data[index].productType == 8 ? "DOCUMENT"
+                                                                        "/"
+                                                                        "${data[index].productWeight}kg" : "0"}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            121,
+                                                                            121,
+                                                                            121,
+                                                                            1)),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 15,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Price: ${data[index].customerPayableAmount}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            15,
+                                                                        color: Color.fromRGBO(
+                                                                            204,
+                                                                            0,
+                                                                            0,
+                                                                            1)),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Ghuri Charge: ${data[index].ghuriCharge}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            121,
+                                                                            121,
+                                                                            121,
+                                                                            1)),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 125,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Receivable Amount: ${data[index].receivableAmount}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            121,
+                                                                            121,
+                                                                            121,
+                                                                            1)),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 125,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 15,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Name: ${data[index].customerName}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            33,
+                                                                            33,
+                                                                            33,
+                                                                            1)),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Mobile: ${data[index].customerNumber}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            33,
+                                                                            33,
+                                                                            33,
+                                                                            1)),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Column(
+                                                            children: [
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Address:${data[index].deliveryAddress} , ${data[index].customerArea}",
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            12,
+                                                                        color: Color.fromRGBO(
+                                                                            33,
+                                                                            33,
+                                                                            33,
+                                                                            1)),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    width: 125,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 10.0,
+                                                          bottom: 10.0,
+                                                          left: 10.0,
+                                                          right: 10.0),
+                                                  child: Container(
+                                                    height: 350,
+                                                    padding: EdgeInsets.only(
+                                                        left: 30,
+                                                        right: 20,
+                                                        top: 10),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                        topLeft:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        topRight:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        bottomLeft:
+                                                            Radius.circular(
+                                                                20.0),
+                                                        bottomRight:
+                                                            Radius.circular(
+                                                                20.0),
+                                                      ),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 10),
+                                                      child: Column(
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: <Widget>[
+                                                              Icon(
+                                                                Icons
+                                                                    .check_circle,
+                                                                size: 30,
+                                                                color: data[index].parcelStatus == 0 ||
+                                                                        data[index].parcelStatus ==
+                                                                            1 ||
+                                                                        data[index].parcelStatus ==
+                                                                            2 ||
+                                                                        data[index].parcelStatus ==
+                                                                            3 ||
+                                                                        data[index].parcelStatus ==
+                                                                            4 ||
+                                                                        data[index].parcelStatus ==
+                                                                            5
+                                                                    ? Color
+                                                                        .fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1)
+                                                                    : Color
+                                                                        .fromRGBO(
+                                                                            180,
+                                                                            180,
+                                                                            180,
+                                                                            1),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 30,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
                                                                   children: [
-                                                                    Column(
+                                                                    Row(
                                                                       children: [
                                                                         Text(
-                                                                          "TrackID: ${data[index].trackId}",
+                                                                          'Pending',
                                                                           style: TextStyle(
-                                                                              fontSize: 16,
+                                                                              fontSize: 15,
                                                                               color: Colors.black),
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
                                                                     Row(
                                                                       children: [
                                                                         Text(
-                                                                          "Invoice Number: ${data[index].invoiceNumber}",
-                                                                          style: TextStyle(
-                                                                              fontSize: 16,
-                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Product Type: ${data[index].productType == 1 ? "GLASS"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 2 ? "WOODEN"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 3 ? "METAL"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 4 ? "DRESS"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 5 ? "COSMETIC"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 6 ? "JEWELLERY"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 7 ? "BOOK"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : data[index].productType == 8 ? "DOCUMENT"
-                                                                              "/"
-                                                                              "${data[index].productWeight}kg" : "0"}",
+                                                                          '8 Aug 2021 12:00 PM',
                                                                           style: TextStyle(
                                                                               fontSize: 12,
                                                                               color: Color.fromRGBO(121, 121, 121, 1)),
@@ -471,641 +734,441 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
                                                                     ),
                                                                   ],
                                                                 ),
-                                                                SizedBox(
-                                                                  height: 15,
-                                                                ),
-                                                                Column(
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 30,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: <Widget>[
+                                                              Icon(
+                                                                Icons
+                                                                    .check_circle,
+                                                                size: 30,
+                                                                color: data[index].parcelStatus == 1 ||
+                                                                        data[index].parcelStatus ==
+                                                                            2 ||
+                                                                        data[index].parcelStatus ==
+                                                                            3 ||
+                                                                        data[index].parcelStatus ==
+                                                                            4 ||
+                                                                        data[index].parcelStatus ==
+                                                                            5
+                                                                    ? Color
+                                                                        .fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1)
+                                                                    : Color
+                                                                        .fromRGBO(
+                                                                            180,
+                                                                            180,
+                                                                            180,
+                                                                            1),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 30,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
                                                                   children: [
                                                                     Row(
                                                                       children: [
                                                                         Text(
-                                                                          "Price: ${data[index].customerPayableAmount}",
+                                                                          'On Pickup',
                                                                           style: TextStyle(
                                                                               fontSize: 15,
-                                                                              color: Color.fromRGBO(204, 0, 0, 1)),
+                                                                              color: Colors.black),
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
                                                                     Row(
                                                                       children: [
                                                                         Text(
-                                                                          "Ghuri Charge: ${data[index].ghuriCharge}",
+                                                                          'waiting...',
                                                                           style: TextStyle(
                                                                               fontSize: 12,
                                                                               color: Color.fromRGBO(121, 121, 121, 1)),
                                                                         ),
-                                                                        SizedBox(
-                                                                          width:
-                                                                              125,
-                                                                        ),
                                                                       ],
                                                                     ),
                                                                   ],
                                                                 ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Receivable Amount: ${data[index].receivableAmount}",
-                                                                          style: TextStyle(
-                                                                              fontSize: 12,
-                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width:
-                                                                              125,
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 15,
-                                                                ),
-                                                                Column(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Name: ${data[index].customerName}",
-                                                                          style: TextStyle(
-                                                                              fontSize: 12,
-                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Mobile: ${data[index].customerNumber}",
-                                                                          style: TextStyle(
-                                                                              fontSize: 12,
-                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 5,
-                                                                ),
-                                                                Column(
-                                                                  children: [
-                                                                    Row(
-                                                                      children: [
-                                                                        Text(
-                                                                          "Address:${data[index].deliveryAddress} , ${data[index].customerArea}",
-                                                                          style: TextStyle(
-                                                                              fontSize: 12,
-                                                                              color: Color.fromRGBO(33, 33, 33, 1)),
-                                                                        ),
-                                                                        SizedBox(
-                                                                          width:
-                                                                              125,
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
+                                                              )
+                                                            ],
                                                           ),
-                                                        ),
+                                                          SizedBox(
+                                                            height: 30,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: <Widget>[
+                                                              Icon(
+                                                                Icons
+                                                                    .check_circle,
+                                                                size: 30,
+                                                                color: data[index].parcelStatus == 2 ||
+                                                                        data[index].parcelStatus ==
+                                                                            3 ||
+                                                                        data[index].parcelStatus ==
+                                                                            4 ||
+                                                                        data[index].parcelStatus ==
+                                                                            5
+                                                                    ? Color
+                                                                        .fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1)
+                                                                    : Color
+                                                                        .fromRGBO(
+                                                                            180,
+                                                                            180,
+                                                                            180,
+                                                                            1),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 30,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'Picked Up',
+                                                                          style: TextStyle(
+                                                                              fontSize: 15,
+                                                                              color: Colors.black),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'waiting...',
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 30,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: <Widget>[
+                                                              Icon(
+                                                                Icons
+                                                                    .check_circle,
+                                                                size: 30,
+                                                                color: data[index].parcelStatus == 3 ||
+                                                                        data[index].parcelStatus ==
+                                                                            4 ||
+                                                                        data[index].parcelStatus ==
+                                                                            5
+                                                                    ? Color
+                                                                        .fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1)
+                                                                    : Color
+                                                                        .fromRGBO(
+                                                                            180,
+                                                                            180,
+                                                                            180,
+                                                                            1),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 30,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'In Hub',
+                                                                          style: TextStyle(
+                                                                              fontSize: 15,
+                                                                              color: Colors.black),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'waiting...',
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 30,
+                                                          ),
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: <Widget>[
+                                                              Icon(
+                                                                Icons
+                                                                    .check_circle,
+                                                                size: 30,
+                                                                color: data[index].parcelStatus ==
+                                                                            4 ||
+                                                                        data[index].parcelStatus ==
+                                                                            5
+                                                                    ? Color
+                                                                        .fromRGBO(
+                                                                            255,
+                                                                            204,
+                                                                            0,
+                                                                            1)
+                                                                    : Color
+                                                                        .fromRGBO(
+                                                                            180,
+                                                                            180,
+                                                                            180,
+                                                                            1),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 30,
+                                                              ),
+                                                              Expanded(
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'On Delivery',
+                                                                          style: TextStyle(
+                                                                              fontSize: 15,
+                                                                              color: Colors.black),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    Row(
+                                                                      children: [
+                                                                        Text(
+                                                                          'waiting...',
+                                                                          style: TextStyle(
+                                                                              fontSize: 12,
+                                                                              color: Color.fromRGBO(121, 121, 121, 1)),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ],
                                                       ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .only(
-                                                                top: 10.0,
-                                                                bottom: 10.0,
-                                                                left: 10.0,
-                                                                right: 10.0),
-                                                        child: Container(
-                                                          height: 350,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Container(
+                                                  child: Row(
+                                                    children: <Widget>[
+                                                      Expanded(
+                                                        child: Padding(
                                                           padding:
-                                                              EdgeInsets.only(
-                                                                  left: 30,
-                                                                  right: 20,
-                                                                  top: 10),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.white,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .only(
-                                                              topLeft: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              topRight: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              bottomLeft: Radius
-                                                                  .circular(
-                                                                      20.0),
-                                                              bottomRight:
-                                                                  Radius
-                                                                      .circular(
-                                                                          20.0),
-                                                            ),
-                                                          ),
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    top: 10),
-                                                            child: Column(
-                                                              children: [
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      size: 30,
-                                                                      color: data[index].parcelStatus == 0 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  1 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  2 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  3 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  4 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  5
-                                                                          ? Color.fromRGBO(
-                                                                              255,
-                                                                              204,
-                                                                              0,
-                                                                              1)
-                                                                          : Color.fromRGBO(
-                                                                              180,
-                                                                              180,
-                                                                              180,
-                                                                              1),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 30,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          Column(
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: GlowButton(
+                                                              height: 50,
+                                                              borderRadius:
+                                                                  new BorderRadius
+                                                                          .circular(
+                                                                      24.0),
+                                                              color: Color.fromRGBO(
+                                                                  255, 204, 0, 1),
+                                                              glowColor: Color
+                                                                  .fromRGBO(
+                                                                      255,
+                                                                      204,
+                                                                      0,
+                                                                      1),
+                                                              child: Container(
+                                                                height: 50.0,
+                                                                child: Center(
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      Column(
                                                                         mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
+                                                                            MainAxisAlignment.center,
                                                                         children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'Pending',
-                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                '8 Aug 2021 12:00 PM',
-                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                              ),
-                                                                            ],
+                                                                          Image
+                                                                              .asset(
+                                                                            "images/deselect_Call.png",
+                                                                            height:
+                                                                                20,
+                                                                            width:
+                                                                                20,
                                                                           ),
                                                                         ],
                                                                       ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 30,
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      size: 30,
-                                                                      color: data[index].parcelStatus == 1 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  2 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  3 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  4 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  5
-                                                                          ? Color.fromRGBO(
-                                                                              255,
-                                                                              204,
-                                                                              0,
-                                                                              1)
-                                                                          : Color.fromRGBO(
-                                                                              180,
-                                                                              180,
-                                                                              180,
-                                                                              1),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 30,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          Column(
+                                                                      SizedBox(
+                                                                        width:
+                                                                            10,
+                                                                      ),
+                                                                      Column(
                                                                         mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
+                                                                            MainAxisAlignment.center,
                                                                         children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'On Pickup',
-                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'waiting...',
-                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                              ),
-                                                                            ],
-                                                                          ),
+                                                                          Text(
+                                                                              "Pick Up Man",
+                                                                              style: TextStyle(
+                                                                                fontSize: 16.0,
+                                                                              )),
                                                                         ],
                                                                       ),
-                                                                    )
-                                                                  ],
+                                                                    ],
+                                                                  ),
                                                                 ),
-                                                                SizedBox(
-                                                                  height: 30,
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      size: 30,
-                                                                      color: data[index].parcelStatus == 2 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  3 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  4 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  5
-                                                                          ? Color.fromRGBO(
-                                                                              255,
-                                                                              204,
-                                                                              0,
-                                                                              1)
-                                                                          : Color.fromRGBO(
-                                                                              180,
-                                                                              180,
-                                                                              180,
-                                                                              1),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 30,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'Picked Up',
-                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'waiting...',
-                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 30,
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      size: 30,
-                                                                      color: data[index].parcelStatus == 3 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  4 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  5
-                                                                          ? Color.fromRGBO(
-                                                                              255,
-                                                                              204,
-                                                                              0,
-                                                                              1)
-                                                                          : Color.fromRGBO(
-                                                                              180,
-                                                                              180,
-                                                                              180,
-                                                                              1),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 30,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'In Hub',
-                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'waiting...',
-                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 30,
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .start,
-                                                                  mainAxisSize:
-                                                                      MainAxisSize
-                                                                          .min,
-                                                                  children: <
-                                                                      Widget>[
-                                                                    Icon(
-                                                                      Icons
-                                                                          .check_circle,
-                                                                      size: 30,
-                                                                      color: data[index].parcelStatus == 4 ||
-                                                                              data[index].parcelStatus ==
-                                                                                  5
-                                                                          ? Color.fromRGBO(
-                                                                              255,
-                                                                              204,
-                                                                              0,
-                                                                              1)
-                                                                          : Color.fromRGBO(
-                                                                              180,
-                                                                              180,
-                                                                              180,
-                                                                              1),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 30,
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.start,
-                                                                        children: [
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'On Delivery',
-                                                                                style: TextStyle(fontSize: 15, color: Colors.black),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            children: [
-                                                                              Text(
-                                                                                'waiting...',
-                                                                                style: TextStyle(fontSize: 12, color: Color.fromRGBO(121, 121, 121, 1)),
-                                                                              ),
-                                                                            ],
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
+                                                              ),
+                                                              // shape: new RoundedRectangleBorder(
+                                                              //   borderRadius:
+                                                              //       new BorderRadius.circular(24.0),
+                                                              // ),
+                                                              // splashColor: Color.fromRGBO(255, 204, 0, 1),
+                                                              // elevation: 10,
+                                                              onPressed: () {
+                                                                _launchCaller();
+                                                              }),
                                                         ),
                                                       ),
-                                                      SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      Container(
-                                                        child: Row(
-                                                          children: <Widget>[
-                                                            Expanded(
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .all(
-                                                                        8.0),
-                                                                child:
-                                                                    GlowButton(
-                                                                        height:
-                                                                            50,
-                                                                        borderRadius:
-                                                                            new BorderRadius.circular(
-                                                                                24.0),
-                                                                        color: Color.fromRGBO(
-                                                                            255,
-                                                                            204,
-                                                                            0,
-                                                                            1),
-                                                                        glowColor: Color.fromRGBO(
-                                                                            255,
-                                                                            204,
-                                                                            0,
-                                                                            1),
-                                                                        child:
-                                                                            Container(
-                                                                          height:
-                                                                              50.0,
-                                                                          child:
-                                                                              Center(
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                              children: [
-                                                                                Column(
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Image.asset(
-                                                                                      "images/deselect_Call.png",
-                                                                                      height: 20,
-                                                                                      width: 20,
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                SizedBox(
-                                                                                  width: 10,
-                                                                                ),
-                                                                                Column(
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Text("Pick Up Man",
-                                                                                        style: TextStyle(
-                                                                                          fontSize: 16.0,
-                                                                                        )),
-                                                                                  ],
-                                                                                ),
-                                                                              ],
-                                                                            ),
+                                                      Expanded(
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: GlowButton(
+                                                              color:
+                                                                  Colors.white,
+                                                              height: 50,
+                                                              borderRadius:
+                                                                  new BorderRadius
+                                                                          .circular(
+                                                                      24.0),
+                                                              glowColor:
+                                                                  Colors.grey,
+                                                              child: Container(
+                                                                height: 50.0,
+                                                                child: Center(
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .center,
+                                                                    children: [
+                                                                      Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Image
+                                                                              .asset(
+                                                                            "images/deselect_Call.png",
+                                                                            height:
+                                                                                20,
+                                                                            width:
+                                                                                20,
                                                                           ),
-                                                                        ),
-                                                                        // shape: new RoundedRectangleBorder(
-                                                                        //   borderRadius:
-                                                                        //       new BorderRadius.circular(24.0),
-                                                                        // ),
-                                                                        // splashColor: Color.fromRGBO(255, 204, 0, 1),
-                                                                        // elevation: 10,
-                                                                        onPressed:
-                                                                            () {
-                                                                          _launchCaller();
-                                                                        }),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        width:
+                                                                            10,
+                                                                      ),
+                                                                      Column(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.center,
+                                                                        children: [
+                                                                          Text(
+                                                                              "Delivery Man",
+                                                                              style: TextStyle(
+                                                                                fontSize: 16.0,
+                                                                              )),
+                                                                        ],
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
                                                               ),
-                                                            ),
-                                                            Expanded(
-                                                              child: Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .all(
-                                                                        8.0),
-                                                                child:
-                                                                    GlowButton(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        height:
-                                                                            50,
-                                                                        borderRadius:
-                                                                            new BorderRadius.circular(
-                                                                                24.0),
-                                                                        glowColor:
-                                                                            Colors
-                                                                                .grey,
-                                                                        child:
-                                                                            Container(
-                                                                          height:
-                                                                              50.0,
-                                                                          child:
-                                                                              Center(
-                                                                            child:
-                                                                                Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                                              children: [
-                                                                                Column(
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Image.asset(
-                                                                                      "images/deselect_Call.png",
-                                                                                      height: 20,
-                                                                                      width: 20,
-                                                                                    ),
-                                                                                  ],
-                                                                                ),
-                                                                                SizedBox(
-                                                                                  width: 10,
-                                                                                ),
-                                                                                Column(
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                                  children: [
-                                                                                    Text("Delivery Man",
-                                                                                        style: TextStyle(
-                                                                                          fontSize: 16.0,
-                                                                                        )),
-                                                                                  ],
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        onPressed:
-                                                                            () {
-                                                                          _launchCaller();
-                                                                        }),
-                                                              ),
-                                                            ),
-                                                          ],
+                                                              onPressed: () {
+                                                                _launchCaller();
+                                                              }),
                                                         ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 50,
                                                       ),
                                                     ],
                                                   ),
                                                 ),
-                                              ),
+                                                SizedBox(
+                                                  height: 50,
+                                                ),
+                                              ],
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                      )));
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ));
+                          parcelList(context);
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(
@@ -1347,7 +1410,12 @@ class _ParcelDetailsTabState extends State<ParcelDetailsTab>
   }
 }
 
-Future<List<AddParcelRequestModel>?> parcelList() async {
+Future<List<AddParcelRequestModel>?> parcelList(context) async {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) => ProgressDialog(
+            message: "Please wait...",
+          ));
   String url = API.parcelList +
       "$_merchantId" +
       "&" +
@@ -1363,6 +1431,7 @@ Future<List<AddParcelRequestModel>?> parcelList() async {
       'Authorization': 'Bearer $_bearerToken',
     },
   );
+  Navigator.pop(context);
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = json.decode(response.body);

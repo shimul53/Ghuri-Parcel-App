@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_glow/flutter_glow.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ghuri_parcel_app/AllWidgets/progressDialog.dart';
 import 'package:ghuri_parcel_app/Models/addParcel_model.dart';
 import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
@@ -10,9 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 String? _trackId;
 String? _parcel_trackId;
-String? _customer_name;
-String? _customer_number;
-String? _invoice_number;
 
 class ParcelDetailsSearchScreen extends StatefulWidget {
   @override
@@ -21,7 +20,7 @@ class ParcelDetailsSearchScreen extends StatefulWidget {
 }
 
 class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
-  Future<List<AddParcelRequestModel>>? futureData;
+  Future<List<AddParcelRequestModel>?>? futureData;
   final TextEditingController searchTypeTextEditingController =
       new TextEditingController();
   final TextEditingController searchTextEditingController =
@@ -34,34 +33,36 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
   ];
 
   searchListItem() {
-    if (searchTypeTextEditingController.text == "Track ID") {
-      setState(() {
-        _parcel_trackId = "track_Id";
-        _trackId = searchTextEditingController.text;
-        futureData = parcelList();
-      });
-    } else if (searchTypeTextEditingController.text == "Invoice") {
-      setState(() {
-        _parcel_trackId = "invoice_number";
-        _trackId = searchTextEditingController.text;
-        futureData = parcelList();
-      });
-    } else if (searchTypeTextEditingController.text == "Name") {
-      setState(() {
-        _parcel_trackId = "customer_name";
-        _trackId = searchTextEditingController.text;
-        futureData = parcelList();
-      });
-    } else if (searchTypeTextEditingController.text == "Number") {
-      setState(() {
-        _parcel_trackId = "customer_number";
-        _trackId = searchTextEditingController.text;
-        futureData = parcelList();
-      });
-    } else {
-      setState(() {
-        _trackId = null;
-      });
+    if (searchTypeTextEditingController.text != null) {
+      if (searchTypeTextEditingController.text == "Track ID") {
+        setState(() {
+          _parcel_trackId = "track_Id";
+          _trackId = searchTextEditingController.text;
+          futureData = parcelList(context);
+        });
+      } else if (searchTypeTextEditingController.text == "Invoice") {
+        setState(() {
+          _parcel_trackId = "invoice_number";
+          _trackId = searchTextEditingController.text;
+          futureData = parcelList(context);
+        });
+      } else if (searchTypeTextEditingController.text == "Name") {
+        setState(() {
+          _parcel_trackId = "customer_name";
+          _trackId = searchTextEditingController.text;
+          futureData = parcelList(context);
+        });
+      } else if (searchTypeTextEditingController.text == "Number") {
+        setState(() {
+          _parcel_trackId = "customer_number";
+          _trackId = searchTextEditingController.text;
+          futureData = parcelList(context);
+        });
+      } else {
+        setState(() {
+          toast("Please Select Search Category ");
+        });
+      }
     }
   }
 
@@ -171,7 +172,6 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
                         child: IconButton(
                           onPressed: () {
                             setState(() {
-                              parcelList();
                               searchListItem();
                             });
                           },
@@ -190,7 +190,7 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
             ),
           ),
           Expanded(
-            child: FutureBuilder<List<AddParcelRequestModel>>(
+            child: FutureBuilder<List<AddParcelRequestModel>?>(
               future: futureData,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -923,6 +923,8 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
                                             ],
                                           ),
                                         )));
+
+                            parcelList(context);
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(
@@ -1166,7 +1168,12 @@ class _ParcelDetailsSearchScreenState extends State<ParcelDetailsSearchScreen> {
   }
 }
 
-Future<List<AddParcelRequestModel>> parcelList() async {
+Future<List<AddParcelRequestModel>?> parcelList(context) async {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) => ProgressDialog(
+            message: "Please wait...",
+          ));
   String url = API.baseUrl +
       "v1/parcel/search?department=1&id=1&tag=$_parcel_trackId&value=$_trackId";
 
@@ -1177,6 +1184,8 @@ Future<List<AddParcelRequestModel>> parcelList() async {
       'Authorization': 'Bearer ${API.bearerToken}',
     },
   );
+
+  Navigator.pop(context);
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -1197,4 +1206,16 @@ _launchCaller() async {
   } else {
     throw 'Could not launch $url';
   }
+}
+
+toast(String message) {
+  Fluttertoast.cancel();
+  return Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 4,
+      //backgroundColor: Colors.black,
+      //textColor: Colors.white,
+      fontSize: 15.0);
 }

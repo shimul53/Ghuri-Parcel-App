@@ -1,16 +1,3 @@
-class RegistrationResponseModel {
-  final String? token;
-  final String? error;
-
-  RegistrationResponseModel({this.token, this.error});
-  factory RegistrationResponseModel.fromJson(Map<String, dynamic> json) {
-    return RegistrationResponseModel(
-      token: json["token"] != null ? json["token"] : "",
-      error: json["error"] != null ? json["error"] : "",
-    );
-  }
-}
-
 class RegistrationRequestModel {
   String? merchantName;
   String? email;

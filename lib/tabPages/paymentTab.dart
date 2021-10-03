@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:ghuri_parcel_app/AllWidgets/progressDialog.dart';
 import 'package:ghuri_parcel_app/Models/payment_model.dart';
 import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +25,7 @@ class _PaymentTabState extends State<PaymentTab> {
     setState(() {
       _merchantId = (sharedPreferences.getInt(API.merchantId));
       _bearerToken = (sharedPreferences.getString(API.token) ?? '');
-      futureData = parcelList();
+      futureData = parcelList(context);
     });
   }
 
@@ -146,7 +148,12 @@ class _PaymentTabState extends State<PaymentTab> {
   }
 }
 
-Future<List<PaymentRequestModel>?> parcelList() async {
+Future<List<PaymentRequestModel>?> parcelList(context) async {
+  showDialog(
+      context: context,
+      builder: (BuildContext context) => ProgressDialog(
+            message: "Please wait...",
+          ));
   String url = API.baseUrl + "v1/parcel/merchant/payment_history/$_merchantId";
   print(url);
   var response = await http.get(
@@ -156,6 +163,7 @@ Future<List<PaymentRequestModel>?> parcelList() async {
       'Authorization': 'Bearer $_bearerToken',
     },
   );
+  Navigator.pop(context);
 
   if (response.statusCode == 200) {
     Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -166,4 +174,37 @@ Future<List<PaymentRequestModel>?> parcelList() async {
   } else {
     throw Exception('Unexpected error occured!');
   }
+}
+
+getProgressDialog() {
+  return Dialog(
+    child: new Container(
+      width: double.infinity,
+      height: 80,
+      decoration: BoxDecoration(
+        color: CupertinoColors.white,
+        borderRadius: BorderRadius.circular(6.0),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(15.0),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20.0,
+            ),
+            CupertinoActivityIndicator(
+              radius: 10,
+            ),
+            SizedBox(
+              width: 30.0,
+            ),
+            Text(
+              "Please wait...",
+              style: TextStyle(color: Colors.black, fontSize: 15.0),
+            )
+          ],
+        ),
+      ),
+    ),
+  );
 }

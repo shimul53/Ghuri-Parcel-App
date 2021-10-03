@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_glow/flutter_glow.dart';
@@ -10,10 +9,6 @@ import 'package:ghuri_parcel_app/Models/dropdownItemInfo.dart';
 import 'package:ghuri_parcel_app/Models/registration_model.dart';
 import 'package:ghuri_parcel_app/configApi.dart';
 import 'package:http/http.dart' as http;
-
-import 'package:ghuri_parcel_app/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'loginScreen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -24,8 +19,33 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  bool _isLoading = false;
   var errorMsg;
+
+  bool _isAreaVisible = false;
+  showArea() {
+    if (cityTextEditingController.text == "Dhaka") {
+      setState(() {
+        _isAreaVisible = true;
+      });
+    } else {
+      setState(() {
+        _isAreaVisible = false;
+      });
+    }
+  }
+
+  String? _area;
+  area() {
+    if (cityTextEditingController.text == "Dhaka") {
+      setState(() {
+        _area = areaTextEditingController.text;
+      });
+    } else {
+      setState(() {
+        _area = cityTextEditingController.text;
+      });
+    }
+  }
 
   RegistrationRequestModel? registrationRequestModel;
 
@@ -425,6 +445,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   ),
                                   onSelected: (String value) {
                                     cityTextEditingController.text = value;
+
+                                    showArea();
+                                    area();
                                   },
                                   itemBuilder: (BuildContext context) {
                                     return items.map<PopupMenuItem<String>>(
@@ -451,6 +474,65 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     SizedBox(
                       height: 1.0,
                     ),
+                    Visibility(
+                      visible: _isAreaVisible,
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              child: TextField(
+                                controller: areaTextEditingController,
+                                cursorColor: Color.fromRGBO(255, 204, 0, 1),
+                                keyboardType: TextInputType.name,
+                                decoration: InputDecoration(
+                                  focusedBorder: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color.fromRGBO(255, 204, 0, 1)),
+                                  ),
+                                  border: UnderlineInputBorder(
+                                    borderSide: BorderSide(
+                                        color: Color.fromRGBO(255, 204, 0, 1)),
+                                  ),
+                                  prefixIcon: Image.asset(
+                                    "images/deselect_building.png",
+                                    scale: 3,
+                                  ),
+                                  suffixIcon: PopupMenuButton<String>(
+                                    icon: const Icon(
+                                      Icons.arrow_drop_down,
+                                    ),
+                                    onSelected: (String value) {
+                                      areaTextEditingController.text = value;
+                                      area();
+                                    },
+                                    itemBuilder: (BuildContext context) {
+                                      return areaItems
+                                          .map<PopupMenuItem<String>>(
+                                              (String value) {
+                                        return new PopupMenuItem(
+                                            child: new Text(value),
+                                            value: value);
+                                      }).toList();
+                                    },
+                                  ),
+                                  labelText: "Area",
+                                  labelStyle: TextStyle(
+                                      fontSize: 14.0, color: Colors.black87),
+                                  hintStyle: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 10.0,
+                                  ),
+                                ),
+                                style: TextStyle(fontSize: 14.0),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 1.0,
+                    ),
                     TextField(
                       controller: addressTextEditingController,
                       onSubmitted: (input) =>
@@ -471,38 +553,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           scale: 3,
                         ),
                         labelText: "Address",
-                        labelStyle:
-                            TextStyle(fontSize: 14.0, color: Colors.black87),
-                        hintStyle: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 10.0,
-                        ),
-                      ),
-                      style: TextStyle(fontSize: 14.0),
-                    ),
-                    SizedBox(
-                      height: 1.0,
-                    ),
-                    TextField(
-                      controller: areaTextEditingController,
-                      onSubmitted: (input) =>
-                          registrationRequestModel!.area = input,
-                      cursorColor: Color.fromRGBO(255, 204, 0, 1),
-                      decoration: InputDecoration(
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Color.fromRGBO(255, 204, 0, 1)),
-                        ),
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Color.fromRGBO(255, 204, 0, 1),
-                          ),
-                        ),
-                        prefixIcon: Image.asset(
-                          "images/area_deselect.png",
-                          scale: 3,
-                        ),
-                        labelText: "Area",
                         labelStyle:
                             TextStyle(fontSize: 14.0, color: Colors.black87),
                         hintStyle: TextStyle(
@@ -595,12 +645,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           lastNameTextEditingController.text.toString(),
                           emailTextEditingController.text.toString(),
                           phoneTextEditingController.text.toString(),
+                          passwordTextEditingController.text.toString(),
                           shopNameTextEditingController.text.toString(),
                           shopLinkTextEditingController.text.toString(),
                           cityTextEditingController.text.toString(),
                           areaTextEditingController.text.toString(),
                           addressTextEditingController.text.toString(),
-                          passwordTextEditingController.text.toString(),
                           context,
                         );
                       }
@@ -622,11 +672,11 @@ registerNewUser(
     String lastName,
     String email,
     String phone,
+    String password,
     String shopName,
     String shopUrl,
     String city,
     String address,
-    String password,
     String area,
     BuildContext context) async {
   String url = API.registrationUrl;
@@ -640,31 +690,38 @@ registerNewUser(
       'merchantName': firstName + " " + lastName,
       'email': email,
       'phone': phone,
+      'password': password,
       'shopName': shopName,
       'shopUrl': shopUrl,
       'city': city,
       'area': area,
       'address': address,
-      'password': password,
       "userType": 1,
       "userRole": 1,
     }),
   );
-  String sendOtpUrl = API.sendOTP;
-  var otpResponse = await http.post(
-    Uri.parse(sendOtpUrl),
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(<String, dynamic>{
-      "msisdn": "88" + phone,
-    }),
-  );
 
-  if (response.statusCode == 200 && otpResponse.statusCode == 200) {
+  if (response.statusCode == 200) {
     Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (BuildContext context) => OTPScreen()),
         (Route<dynamic> route) => false);
+
+    String sendOtpUrl = API.sendOTP;
+
+    var otpResponse = await http.post(
+      Uri.parse(sendOtpUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        "msisdn": "88" + phone,
+      }),
+    );
+
+    if (otpResponse.statusCode == 200) {
+    } else {
+      throw Exception('Failed to load data');
+    }
   } else {
     throw Exception('Failed to load data');
   }
